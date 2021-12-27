@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>PDF Helfer</title>
+  </head>
+  <body>
+    <div class="container-fluid gx-1">
+      <div class="row row-cols-2 gx-0">
+        <div class="col-4 px-2 py-0">
+          <h4>Eingabe</h4>
+          <ul style="background: #eee; 
+                     border-radius: 4px; 
+                     height: calc(100vh - 405px); 
+                     list-style: none;
+                     overflow-y: auto;" 
+               class="px-2 py-1 mb-2"
+               id="input-list">
+            
+          </ul>
+
+          <h4>Seiteneinstellungen</h4>
+
+          <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
+            <label for="margin-slider" class="form-label">Ränder:</label>
+            <div class="row mb-1">
+              <div class="col-8 pe-0">
+                <input type="range" class="form-range" id="margin-slider" min="0" max="100" step="5" value="35">
+              </div>
+              <div class="col-4 col-sm-4" style="margin-top: -8px">
+                <input type="text" class="form-control" disabled id="margin-slider-value" value="35">
+              </div>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" value="" id="omit-full-page-margin" checked>
+              <label class="form-check-label" for="omit-full-page-margin">
+                Ränder bei großen Bildern weglassen
+              </label>
+            </div>
+          </div>
+
+          <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
+            <label for="spacing-slider" class="form-label">Abstand zwischen Bildern:</label>
+            <div class="row mb-1">
+              <div class="col-8 pe-0">
+                <input type="range" class="form-range" id="spacing-slider" min="0" max="100" step="5" value="35">
+              </div>
+              <div class="col-4" style="margin-top: -8px">
+                <input type="text" class="form-control" disabled id="spacing-slider-value" value="35">
+              </div>
+            </div>
+          </div>
+
+          <h4>Ausgabe</h4>
+
+          <div style="background: #eee; border-radius: 4px;" class="px-2 py-2 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" value="" id="optimize-for-fax" disabled>
+              <label class="form-check-label" for="optimize-for-fax">
+                Für Faxversand optimieren
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-8 px-2 py-0">
+
+          <h4>Vorschau</h4>
+
+          <div class="my-2" id="preview-spinner" style="background: #eee; border-radius: 4px; height: calc(100vh - 93px); text-align: center;">
+            <div class="spinner-border text-secondary" 
+                 role="status" 
+                 style="position: relative; margin-top: 100px; width: 150px; height: 150px;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <iframe id="preview-iframe" 
+                  class="my-2" 
+                  style="display: none;
+                         background: #eee; 
+                         border-radius: 4px; 
+                         border: 2px solid #eee;
+                         width: 100%; 
+                         height: calc(100vh - 93px);">
+          </iframe>
+          
+          <div>
+            <a class="btn btn-primary float-end" id="save-button"><i class="bi-save"></i> PDF speichern...</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
