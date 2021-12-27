@@ -74,7 +74,7 @@ async function generateTempPDF() {
 function showPreview(pdfDataUrl: string) {
     document.getElementById("preview-spinner").style.display = "none";
     document.getElementById("preview-iframe").style.display = "block";
-    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl;
+    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl + "#toolbar=0&view=FitH";
 }
 
 async function savePDF() {

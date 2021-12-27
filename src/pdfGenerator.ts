@@ -58,7 +58,7 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
             
             console.log("Starting next page");
             
-            doc.addPage({ margin: marginSize });
+            doc.addPage({ size: pageSize, margin: 0 });
             currentYPosition = marginSize;
         }
         
