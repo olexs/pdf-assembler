@@ -2,14 +2,27 @@ import pdfkit from "pdfkit";
 import { imageSize } from "image-size";
 import BlobStream from "blob-stream";
 
-export default async function generatePdf(inputFiles: string[]): Promise<string> {
+interface GeneratorOptions {
+    pageSize: "A4",
+    marginSize: number,
+    spacingBetweenElements: number,
+    omitFullPageMargin: boolean,
+    optimizeForFax: boolean
+}
+
+const defaultOptions: GeneratorOptions = {
+    pageSize: "A4",
+    marginSize: 35,
+    spacingBetweenElements: 35,
+    omitFullPageMargin: true,
+    optimizeForFax: false
+}
+
+async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOptions>): Promise<string> {
     // -------
     //  Setup
     // -------
-
-    const pageSize = "A4";
-    const marginSize = 36;
-    const spacingBetweenElements = 36;
+    const { pageSize, marginSize, spacingBetweenElements } = options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
 
     // https://pdfkit.org/docs/paper_sizes.html, all numbers in PostScript points
     const fullPageWidth = 595.28;
@@ -34,21 +47,21 @@ export default async function generatePdf(inputFiles: string[]): Promise<string>
     while (inputFiles.length > 0) {
         const inputFile = inputFiles.shift();
         console.log(`Processing ${inputFile}`);
-
+        
         const size = imageSize(inputFile);
         const scaledHeight = size.height * (availableWidth / size.width);
         const requiredHeight = Math.ceil(Math.min(availableHeightPerPage, scaledHeight));
         console.debug(`Original size: ${size.width} x ${size.height}, required height: ${requiredHeight} pt`);
-
+        
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (requiredHeight > heightAvailableOnCurrentPage) {
-
+            
             console.log("Starting next page");
-
+            
             doc.addPage({ margin: marginSize });
             currentYPosition = marginSize;
         }
-
+        
         doc.image(inputFile, marginSize, currentYPosition, { fit: [availableWidth, requiredHeight] });
 
         currentYPosition += (requiredHeight + spacingBetweenElements);
@@ -85,3 +98,5 @@ function blobToDataURL(blob: Blob): Promise<string> {
         reader.readAsDataURL(blob);
     });
 }
+
+export { generatePdf, GeneratorOptions };
