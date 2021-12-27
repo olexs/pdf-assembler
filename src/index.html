@@ -11,13 +11,26 @@
           <h4>Eingabe</h4>
           <ul style="background: #eee; 
                      border-radius: 4px; 
-                     height: calc(100vh - 406px); 
-                     list-style: none;
-                     overflow-y: auto;" 
-               class="px-2 py-1 mb-2"
+                     border: 2px solid #eee;
+                     height: calc(100vh - 452px); 
+                     overflow-y: auto;
+                     overflow-x: hidden;" 
+               class="mb-2 list-group"
                id="input-list">
-               
+
           </ul>
+
+          <div class="d-flex flex-row mb-2">
+            <button class="flex-fill btn btn-secondary" id="btn-input-sort">
+              <i class="bi bi-sort-alpha-down"></i>
+              Sortieren
+            </button>
+            &nbsp;
+            <button class="flex-fill btn btn-secondary" id="btn-input-add">
+              <i class="bi bi-file-earmark-plus"></i>
+              Hinzufügen...
+            </button>
+          </div>
 
           <h4>Seiteneinstellungen</h4>
 

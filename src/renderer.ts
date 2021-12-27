@@ -3,6 +3,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap';
 import { ipcRenderer } from 'electron';
 import { generatePdf, GeneratorOptions } from './pdfGenerator';
+import sharp from 'sharp';
 
 ipcRenderer.on("inputFiles", (_event, data) => processInputFiles(data as string[]));
 let inputFiles: string[] = ["C:/Dev/image-tool-electron/input/IMG_9402.JPG", "C:/Dev/image-tool-electron/input/IMG_9403.JPG"];
@@ -12,7 +13,8 @@ async function processInputFiles(newInputFiles: string[]) {
         console.error("Renderer: No input files provided!");
     } else {
         console.log(`Renderer: Processing ${newInputFiles.length} input files`);
-        document.getElementById("input-list").innerHTML = newInputFiles.map((file) => `<li>${file}</li>`).join("");
+        const previews = await Promise.all(newInputFiles.map(async (file, index) => { return await generateInputFilePreview(file, index, newInputFiles.length) }));
+        document.getElementById("input-list").innerHTML = previews.join("");
     }
     inputFiles = newInputFiles;
 
@@ -78,4 +80,45 @@ function showPreview(pdfDataUrl: string) {
 async function savePDF() {
     console.log("TODO: actually save some shit here");    
 }
+
+async function generateInputFilePreview(file: string, index: number, totalImages: number): Promise<string> {
+    const imageThumbnail = await sharp(file)
+        .resize(128, 64, { fit: 'contain', background: "white" })
+        .toFormat("jpg")
+        .toBuffer();
+    const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
+
+    const filenameSegments = file.split("\\");
+    const filename = filenameSegments[filenameSegments.length - 1];
+    
+    return `<li class="list-group-item d-flex flex-row px-2">
+        <img src="${imageThumbnailSrc}" alt="${filename}" class="me-2">
+        <div class="flex-fill" style="min-width: 0">
+            <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-weight: bold">${filename}</div>
+            <div class="mt-2">
+                <button type="button" 
+                        title="Entfernen"
+                        id="btn-input-up-${index}" 
+                        class="btn btn-danger float-end btn-sm ms-1">
+                    <i class="bi-trash"></i>
+                </button>
+                <button type="button" 
+                        title="Nach unten bewegen"
+                        id="btn-input-down-${index}" 
+                        class="btn btn-secondary float-end btn-sm ms-1" 
+                        ${index === totalImages - 1 ? 'disabled' : ''}>
+                    <i class="bi-arrow-down"></i>
+                </button>
+                <button type="button" 
+                        title="Nach oben bewegen"
+                        id="btn-input-up-${index}" 
+                        class="btn btn-secondary float-end btn-sm ms-1" 
+                        ${index === 0 ? 'disabled' : ''}>
+                    <i class="bi-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </li>`;
+}
+
 

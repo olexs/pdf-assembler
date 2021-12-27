@@ -58,4 +58,7 @@ module.exports = {
       fs: 'pdfkit/js/virtual-fs.js'
     }
   },
+  externals: {
+    'sharp': 'commonjs sharp'
+  }
 };
