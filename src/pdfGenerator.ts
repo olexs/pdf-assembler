@@ -1,6 +1,11 @@
 import pdfkit from "pdfkit";
 import { imageSize } from "image-size";
 import BlobStream from "blob-stream";
+import tempy from 'tempy';
+import fs from 'fs';
+import * as child from 'child_process';
+import util from 'util';
+const exec = util.promisify(child.exec);
 
 interface GeneratorOptions {
     pageSize: "A4",
@@ -22,7 +27,7 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
     // -------
     //  Setup
     // -------
-    const { pageSize, marginSize, spacingBetweenElements } = options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
+    const { pageSize, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } = options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
 
     // https://pdfkit.org/docs/paper_sizes.html, all numbers in PostScript points
     const fullPageWidth = 595.28;
@@ -56,14 +61,31 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
         
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (requiredHeight > heightAvailableOnCurrentPage) {
-            
             console.log("Starting next page");
-            
             doc.addPage({ size: pageSize, margin: 0 });
             currentYPosition = marginSize;
         }
+
+        let processedImage: string;  
+        if (optimizeForFax) {
+            const tempFile = tempy.file({extension: "jpg"});
+            console.log("temp file for", inputFile, ":", tempFile);
+
+            try {
+                await exec(`magick convert "${inputFile}" -colorspace gray ^( +clone -blur 5,5 ^) -compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`);
+            } catch(e: any) {
+                console.error(e);
+            }
+
+            processedImage = tempFile;
+        } else {
+            processedImage = inputFile;
+        }
         
-        doc.image(inputFile, marginSize, currentYPosition, { fit: [availableWidth, requiredHeight] });
+        doc.image(processedImage, marginSize, currentYPosition, { fit: [availableWidth, requiredHeight] });
+        if (optimizeForFax) {
+            await fs.promises.rm(processedImage);
+        }
 
         currentYPosition += (requiredHeight + spacingBetweenElements);
 
