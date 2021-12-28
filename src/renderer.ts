@@ -3,7 +3,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap';
 import { ipcRenderer } from 'electron';
 import { generatePdf, GeneratorOptions } from './pdfGenerator';
+import { preprocessInputFiles } from './preprocessor';
 import sharp from 'sharp';
+import path from 'path';
 
 /*
  * Helpers
@@ -59,7 +61,7 @@ function registerStaticCallbacks(): void {
  */
 
 let inputFiles: string[] = [];
-ipcRenderer.on("inputFiles", (_event, data) => processInputFiles(data as string[]));
+ipcRenderer.on("inputFiles", async (_event, data) => processInputFiles(await preprocessInputFiles(data as string[])));
 
 async function processInputFiles(newInputFiles: string[]) {
     if (newInputFiles.length === 0) {
@@ -83,8 +85,7 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
         .toBuffer();
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
 
-    const filenameSegments = file.split("\\");
-    const filename = filenameSegments[filenameSegments.length - 1];
+    const filename = path.basename(file, path.extname(file));
     
     return `<li class="list-group-item d-flex flex-row px-2">
         <img src="${imageThumbnailSrc}" alt="${filename}" class="me-2">
@@ -125,9 +126,7 @@ function registerThumbnailCallbacks() {
 }
 
 function deleteInput(index: number): void {
-    const filenameSegments = inputFiles[0].split("\\");
-    const filename = filenameSegments[filenameSegments.length - 1];
-
+    const filename = path.basename(inputFiles[index], path.extname(inputFiles[index]));
     if (!confirm(`${filename} wirklich aus den Eingaben entfernen?`)) return;
 
     inputFiles.splice(index, 1);
