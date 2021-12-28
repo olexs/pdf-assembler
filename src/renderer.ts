@@ -19,7 +19,7 @@ function getInput(id: string): HTMLInputElement {
 
 window.addEventListener("DOMContentLoaded", () => {
     loadSavedOptions();
-    registerStaticChangeListeners();
+    registerStaticCallbacks();
 });
 
 function loadSavedOptions(): void {
@@ -36,7 +36,7 @@ function loadSavedOptions(): void {
     }
 }
 
-function registerStaticChangeListeners(): void {
+function registerStaticCallbacks(): void {
     document.getElementById("save-button").onclick = savePDF;
 
     getInput("margin-slider").onchange = generateTempPDF;
@@ -49,6 +49,9 @@ function registerStaticChangeListeners(): void {
     };
     getInput("omit-full-page-margin").onchange = generateTempPDF;
     getInput("optimize-for-fax").onchange = generateTempPDF;
+
+    document.getElementById("btn-input-sort").onclick = sortInputs;
+    document.getElementById("btn-input-add").onclick = addInput;
 }
 
 /*
@@ -150,6 +153,16 @@ function moveInputDown(index: number): void {
     inputFiles[index + 1] = temp;
 
     processInputFiles(inputFiles);
+}
+
+function sortInputs(): void {
+    inputFiles.sort();
+
+    processInputFiles(inputFiles);
+}
+
+function addInput(): void {
+
 }
 
 /*
