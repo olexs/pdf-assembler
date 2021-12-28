@@ -6,6 +6,7 @@ import { generatePdf, GeneratorOptions } from './pdfGenerator';
 import { preprocessInputFiles } from './preprocessor';
 import sharp from 'sharp';
 import path from 'path';
+import fs from 'fs';
 
 /*
  * Helpers
@@ -60,8 +61,12 @@ function registerStaticCallbacks(): void {
  * Input processing and input preview
  */
 
+let originalInputFiles: string[] = [];
 let inputFiles: string[] = [];
-ipcRenderer.on("inputFiles", async (_event, data) => processInputFiles(await preprocessInputFiles(data as string[])));
+ipcRenderer.on("inputFiles", async (_event, data) => { 
+    originalInputFiles = data as string[];
+    await processInputFiles(await preprocessInputFiles(originalInputFiles));
+});
 
 async function processInputFiles(newInputFiles: string[]) {
     if (newInputFiles.length === 0) {
@@ -101,7 +106,8 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
                 <button type="button" 
                         title="Entfernen"
                         id="btn-input-delete-${index}" 
-                        class="btn btn-danger float-end btn-sm ms-1">
+                        class="btn btn-danger float-end btn-sm ms-1"
+                        ${totalImages <= 1 ? 'disabled' : ''}>
                     <i class="bi-trash"></i>
                 </button>
                 <button type="button" 
@@ -180,7 +186,8 @@ async function generateTempPDF() {
     document.getElementById("preview-iframe").style.display = "none";
     document.getElementById("preview-spinner").style.display = "block";
     document.getElementById("progressbar").style.width = `0%`;
-
+    
+    (<HTMLButtonElement>document.getElementById("save-button")).disabled = true;
     if (previousBlobUrl) window.URL.revokeObjectURL(previousBlobUrl);
     
     const options = readOptionsFromUI();
@@ -189,6 +196,8 @@ async function generateTempPDF() {
 
     localStorage.setItem("generator-preferences", JSON.stringify(options));
     previousBlobUrl = pdfDataUrl;
+
+    (<HTMLButtonElement>document.getElementById("save-button")).disabled = false;
 }
 
 function readOptionsFromUI(): Partial<GeneratorOptions> {
@@ -219,9 +228,15 @@ function showPreview(pdfDataUrl: string) {
  */
 
 async function savePDF() {
-    console.log("TODO: actually save some shit here");    
+    ipcRenderer.send("saveDialogTriggered", originalInputFiles[0]);
 }
 
+ipcRenderer.on("saveDialogConfirmed", async (_event, data) => finishSaving(data as string));
 
+async function finishSaving(chosenFilename: string) {
+    const response = await fetch(previousBlobUrl);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    await fs.promises.writeFile(chosenFilename, buffer);
+}
 
 
