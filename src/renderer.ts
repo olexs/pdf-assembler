@@ -169,13 +169,17 @@ function addInput(): void {
  * PDF generation
  */
 
+let previousBlobUrl = "";
+
 async function generateTempPDF() {
+    if (previousBlobUrl) window.URL.revokeObjectURL(previousBlobUrl);
+    
     const options = readOptionsFromUI();
     const pdfDataUrl = await generatePdf([...inputFiles], options);
-    console.log("PDF data: string size: " + pdfDataUrl.length);
-    showPreview(pdfDataUrl);
+    showPreview(pdfDataUrl  + "#view=FitH&toolbar=0");
 
     localStorage.setItem("generator-preferences", JSON.stringify(options));
+    previousBlobUrl = pdfDataUrl;
 }
 
 function readOptionsFromUI(): Partial<GeneratorOptions> {
@@ -190,7 +194,7 @@ function readOptionsFromUI(): Partial<GeneratorOptions> {
 function showPreview(pdfDataUrl: string) {
     document.getElementById("preview-spinner").style.display = "none";
     document.getElementById("preview-iframe").style.display = "block";
-    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl + "#toolbar=0&view=FitH";
+    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl;// + "#toolbar=0&view=FitH";
 }
 
 /*

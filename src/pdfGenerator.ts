@@ -40,6 +40,7 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
     // Generate output PDF
     // -------------------
     const doc = new pdfkit({ autoFirstPage: false, size: pageSize });
+    const stream = doc.pipe(BlobStream());
 
     let currentYPosition = availableHeightPerPage;
 
@@ -72,31 +73,17 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
     }
 
     console.log("All images processed, outputting PDF document");
-    let dataUrl = "";
-
-    await new Promise<void>(async resolve => {
-        const stream = doc.pipe(BlobStream());
+    const dataUrl = await new Promise<string>(resolve => {
         doc.end();
         stream.on('finish', async function () {
-            dataUrl = await blobToDataURL(stream.toBlob('application/pdf'));
             console.log("Output done.");
-            resolve();
+            resolve(stream.toBlobURL('application/pdf'));
         });
     });
 
     console.log("All done.");
 
     return dataUrl;
-}
-
-function blobToDataURL(blob: Blob): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = _e => resolve(reader.result as string);
-        reader.onerror = _e => reject(reader.error);
-        reader.onabort = _e => reject(new Error("Read aborted"));
-        reader.readAsDataURL(blob);
-    });
 }
 
 export { generatePdf, GeneratorOptions };
