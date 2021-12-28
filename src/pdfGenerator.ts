@@ -12,7 +12,8 @@ interface GeneratorOptions {
     marginSize: number,
     spacingBetweenElements: number,
     omitFullPageMargin: boolean,
-    optimizeForFax: boolean
+    optimizeForFax: boolean,
+    exitAfterSaving: boolean
 }
 
 const defaultOptions: GeneratorOptions = {
@@ -20,7 +21,8 @@ const defaultOptions: GeneratorOptions = {
     marginSize: 30,
     spacingBetweenElements: 30,
     omitFullPageMargin: true,
-    optimizeForFax: false
+    optimizeForFax: false,
+    exitAfterSaving: true
 }
 
 async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {

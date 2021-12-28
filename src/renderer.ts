@@ -7,6 +7,9 @@ import { preprocessInputFiles } from './preprocessor';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import * as child from 'child_process';
+import util from 'util';
+const exec = util.promisify(child.exec);
 
 /*
  * Helpers
@@ -29,13 +32,14 @@ function loadSavedOptions(): void {
     const savedOptionsString = localStorage.getItem("generator-preferences");
 
     if (savedOptionsString) {
-        const savedOptions = JSON.parse(savedOptionsString) as GeneratorOptions;
-        getInput("margin-slider").value = savedOptions.marginSize.toString();
-        getInput("margin-slider-value").value = savedOptions.marginSize.toString();
-        getInput("spacing-slider").value = savedOptions.spacingBetweenElements.toString();
-        getInput("spacing-slider-value").value = savedOptions.spacingBetweenElements.toString();
-        getInput("omit-full-page-margin").checked = savedOptions.omitFullPageMargin;
-        getInput("optimize-for-fax").checked = savedOptions.optimizeForFax;
+        const savedOptions = JSON.parse(savedOptionsString) as Partial<GeneratorOptions>;
+        getInput("margin-slider").value = savedOptions.marginSize.toString() || "30";
+        getInput("margin-slider-value").value = savedOptions.marginSize.toString() || "30";
+        getInput("spacing-slider").value = savedOptions.spacingBetweenElements.toString() || "30";
+        getInput("spacing-slider-value").value = savedOptions.spacingBetweenElements.toString() || "30";
+        getInput("omit-full-page-margin").checked = savedOptions.omitFullPageMargin || true;
+        getInput("optimize-for-fax").checked = savedOptions.optimizeForFax || false;
+        getInput("exit-after-saving").checked = savedOptions.exitAfterSaving || false;
     }
 }
 
@@ -55,6 +59,12 @@ function registerStaticCallbacks(): void {
 
     document.getElementById("btn-input-sort").onclick = sortInputs;
     document.getElementById("btn-input-add").onclick = addInput;
+
+    getInput("exit-after-saving").onchange = () => {
+        const options = readOptionsFromUI();
+        options.exitAfterSaving = getInput("exit-after-saving").checked;
+        localStorage.setItem("generator-preferences", JSON.stringify(options));
+    };
 }
 
 /*
@@ -63,10 +73,7 @@ function registerStaticCallbacks(): void {
 
 let originalInputFiles: string[] = [];
 let inputFiles: string[] = [];
-ipcRenderer.on("inputFiles", async (_event, data) => { 
-    originalInputFiles = data as string[];
-    await processInputFiles(await preprocessInputFiles(originalInputFiles));
-});
+ipcRenderer.on("inputFiles", async (_event, data) => await addNewInputs(data as string[]));
 
 async function processInputFiles(newInputFiles: string[]) {
     if (newInputFiles.length === 0) {
@@ -85,7 +92,7 @@ async function processInputFiles(newInputFiles: string[]) {
 
 async function generateInputThumbnail(file: string, index: number, totalImages: number): Promise<string> {
     const imageThumbnail = await sharp(file)
-        .resize(128, 64, { fit: 'contain', background: "white" })
+        .resize(64, 64, { fit: 'contain', background: "white" })
         .toFormat("jpg")
         .toBuffer();
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
@@ -173,7 +180,16 @@ function sortInputs(): void {
 }
 
 function addInput(): void {
+    ipcRenderer.send("addDialogTriggered", originalInputFiles[0]);
+}
 
+ipcRenderer.on("addDialogConfirmed", async (_event, data) => await addNewInputs(data as string[]));
+
+async function addNewInputs(newInputs: string[]) {
+    originalInputFiles.push(...newInputs);
+    const newPreprocessed = await preprocessInputFiles(newInputs);
+    inputFiles.push(...newPreprocessed)
+    await processInputFiles(inputFiles);
 }
 
 /*
@@ -206,6 +222,7 @@ function readOptionsFromUI(): Partial<GeneratorOptions> {
         spacingBetweenElements: parseInt(getInput("spacing-slider").value) || 30,
         omitFullPageMargin: getInput("omit-full-page-margin").checked,
         optimizeForFax: getInput("optimize-for-fax").checked,
+        exitAfterSaving: getInput("exit-after-saving").checked
     }
 }
 
@@ -237,6 +254,10 @@ async function finishSaving(chosenFilename: string) {
     const response = await fetch(previousBlobUrl);
     const buffer = Buffer.from(await response.arrayBuffer());
     await fs.promises.writeFile(chosenFilename, buffer);
+
+    // await exec(`explorer /select,"${chosenFilename}"`);
+
+    if (getInput("exit-after-saving").checked) ipcRenderer.send("exitAfterSavingTriggered");
 }
 
 

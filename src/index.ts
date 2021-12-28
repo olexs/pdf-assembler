@@ -24,9 +24,10 @@ const createWindow = (): void => {
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
   mainWindow.removeMenu();
   //mainWindow.resizable = false;
+  mainWindow.setMinimumSize(1200, 800);
 
   mainWindow.webContents.on("did-finish-load", () => {
     let inputFilesRelative = process.argv.slice(1);
@@ -38,9 +39,9 @@ const createWindow = (): void => {
   });
 
   mainWindow.webContents.on("ipc-message", (_event, channel, inputFile: string) => {
-    if (channel === "saveDialogTriggered") {
-      showSaveDialog(mainWindow, inputFile);
-    }
+    if (channel === "saveDialogTriggered") showSaveDialog(mainWindow, inputFile);
+    if (channel === "addDialogTriggered") showAddDialog(mainWindow, inputFile);
+    if (channel === "exitAfterSavingTriggered") app.quit();
   })
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -62,6 +63,18 @@ async function showSaveDialog(window: BrowserWindow, inputFile: string) {
   });
   if (!result.canceled && result.filePath) {
     window.webContents.send("saveDialogConfirmed", result.filePath);
+  }
+}
+
+async function showAddDialog(window: BrowserWindow, inputFile: string) {
+  const result = await dialog.showOpenDialog(window, {
+    title: "Eingabe hinzufügen...",
+    defaultPath: path.dirname(inputFile),
+    filters: [ { name: "Unterstützte Eingabeformate", extensions: ["jpg", "jpeg", "pdf", "bmp", "png", "tiff"] } ],
+    properties: ['openFile', 'multiSelections', 'dontAddToRecent']
+  });
+  if (!result.canceled && result.filePaths) {
+    window.webContents.send("addDialogConfirmed", result.filePaths);
   }
 }
 
