@@ -69,6 +69,7 @@ async function processInputFiles(newInputFiles: string[]) {
 
     inputFiles = newInputFiles;    
 
+    registerThumbnailCallbacks();
     if (inputFiles.length > 0) generateTempPDF();
 }
 
@@ -89,7 +90,7 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
             <div class="mt-2">
                 <button type="button" 
                         title="Entfernen"
-                        id="btn-input-up-${index}" 
+                        id="btn-input-delete-${index}" 
                         class="btn btn-danger float-end btn-sm ms-1">
                     <i class="bi-trash"></i>
                 </button>
@@ -110,6 +111,45 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
             </div>
         </div>
     </li>`;
+}
+
+function registerThumbnailCallbacks() {
+    for (let index = 0; index < inputFiles.length; index++) {
+        document.getElementById(`btn-input-delete-${index}`).onclick = () => deleteInput(index);     
+        document.getElementById(`btn-input-up-${index}`).onclick = () => moveInputUp(index);     
+        document.getElementById(`btn-input-down-${index}`).onclick = () => moveInputDown(index);     
+    }
+}
+
+function deleteInput(index: number): void {
+    const filenameSegments = inputFiles[0].split("\\");
+    const filename = filenameSegments[filenameSegments.length - 1];
+
+    if (!confirm(`${filename} wirklich aus den Eingaben entfernen?`)) return;
+
+    inputFiles.splice(index, 1);
+
+    processInputFiles(inputFiles);
+}
+
+function moveInputUp(index: number): void {
+    if (index <= 0) return;
+
+    const temp = inputFiles[index];
+    inputFiles[index] = inputFiles[index - 1];
+    inputFiles[index - 1] = temp;
+
+    processInputFiles(inputFiles);
+}
+
+function moveInputDown(index: number): void {
+    if (index >= inputFiles.length - 1) return;
+
+    const temp = inputFiles[index];
+    inputFiles[index] = inputFiles[index + 1];
+    inputFiles[index + 1] = temp;
+
+    processInputFiles(inputFiles);
 }
 
 /*
