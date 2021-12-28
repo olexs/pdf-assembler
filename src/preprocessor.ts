@@ -1,6 +1,7 @@
 import tempy from 'tempy';
 import fs from 'fs';
 import path from 'path';
+import { ipcRenderer } from 'electron';
 import * as child from 'child_process';
 import util from 'util';
 const exec = util.promisify(child.exec);
@@ -40,6 +41,7 @@ async function processFile(inputFile: string): Promise<string[]> {
 async function deconstructPdf(inputFile: string): Promise<string[]> {
     const inputFilename = path.basename(inputFile);
     const tempDir = tempy.directory({prefix: 'pdfhelper_deconstruct'});
+    ipcRenderer.send("addedTempDir", tempDir);
     console.log("Deconstructing", inputFilename, "to", tempDir);
     const magickTargetFilename = tempDir + path.sep + inputFilename + ".jpg";
     

@@ -97,7 +97,6 @@
     "electron-squirrel-startup": "^1.0.0",
     "image-size": "^1.0.0",
     "pdfkit": "^0.13.0",
-    "sharp": "^0.29.3",
     "tempy": "^2.0.0"
   }
 }

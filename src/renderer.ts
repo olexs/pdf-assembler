@@ -4,11 +4,11 @@ import 'bootstrap';
 import { ipcRenderer } from 'electron';
 import { generatePdf, GeneratorOptions } from './pdfGenerator';
 import { preprocessInputFiles } from './preprocessor';
-import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
+import tempy from 'tempy';
 const exec = util.promisify(child.exec);
 
 /*
@@ -91,11 +91,14 @@ async function processInputFiles(newInputFiles: string[]) {
 }
 
 async function generateInputThumbnail(file: string, index: number, totalImages: number): Promise<string> {
-    const imageThumbnail = await sharp(file)
-        .resize(64, 64, { fit: 'contain', background: "white" })
-        .toFormat("jpg")
-        .toBuffer();
+
+    const tempFile = tempy.file({extension: "jpg"});
+
+    await exec(`magick convert "${file}" -resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`);
+
+    const imageThumbnail = await fs.promises.readFile(tempFile);
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
+    await fs.promises.rm(tempFile);
 
     const filename = path.basename(file, path.extname(file));
 
