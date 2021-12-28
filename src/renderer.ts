@@ -177,8 +177,7 @@ function moveInputDown(index: number): void {
 }
 
 function sortInputs(): void {
-    inputFiles.sort();
-
+    inputFiles.sort((a, b) => path.basename(a).localeCompare(path.basename(b)));
     processInputFiles(inputFiles);
 }
 
