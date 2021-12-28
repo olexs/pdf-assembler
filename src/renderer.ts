@@ -86,12 +86,18 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
 
     const filename = path.basename(file, path.extname(file));
+
+    let page = "";
+    const pageMatch = filename.match(/\.pdf-[0-9]+$/);
+    if (pageMatch && pageMatch[0])
+        page = "Seite " + (parseInt(pageMatch[0].replace(".pdf-", "")) + 1);
     
     return `<li class="list-group-item d-flex flex-row px-2">
         <img src="${imageThumbnailSrc}" alt="${filename}" class="me-2">
         <div class="flex-fill" style="min-width: 0">
             <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-weight: bold">${filename}</div>
             <div class="mt-2">
+                ${page}
                 <button type="button" 
                         title="Entfernen"
                         id="btn-input-delete-${index}" 
@@ -187,8 +193,8 @@ async function generateTempPDF() {
 
 function readOptionsFromUI(): Partial<GeneratorOptions> {
     return {
-        marginSize: parseInt(getInput("margin-slider").value) || 35,
-        spacingBetweenElements: parseInt(getInput("spacing-slider").value) || 35,
+        marginSize: parseInt(getInput("margin-slider").value) || 30,
+        spacingBetweenElements: parseInt(getInput("spacing-slider").value) || 30,
         omitFullPageMargin: getInput("omit-full-page-margin").checked,
         optimizeForFax: getInput("optimize-for-fax").checked,
     }

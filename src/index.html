@@ -17,7 +17,9 @@
                      overflow-x: hidden;" 
                class="mb-2 list-group"
                id="input-list">
-
+            <div class="spinner-border text-secondary" style="width: 100px; height: 100px; margin: auto;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </ul>
 
           <div class="d-flex flex-row mb-2">
@@ -49,14 +51,14 @@
             <label for="margin-slider" class="form-label">Ränder:</label>
             <div class="row mb-1">
               <div class="col-8 pe-0">
-                <input type="range" class="form-range" id="margin-slider" min="0" max="100" step="5" value="35">
+                <input type="range" class="form-range" id="margin-slider" min="0" max="100" step="5" value="30">
               </div>
               <div class="col-4 col-sm-4" style="margin-top: -8px">
-                <input type="text" class="form-control" disabled id="margin-slider-value" value="35">
+                <input type="text" class="form-control" disabled id="margin-slider-value" value="30">
               </div>
             </div>
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" value="" id="omit-full-page-margin" checked disabled>
+              <input class="form-check-input" type="checkbox" value="" id="omit-full-page-margin" checked>
               <label class="form-check-label" for="omit-full-page-margin">
                 Ränder bei großen Bildern weglassen
               </label>
@@ -67,10 +69,10 @@
             <label for="spacing-slider" class="form-label">Abstand zwischen Bildern:</label>
             <div class="row mb-1">
               <div class="col-8 pe-0">
-                <input type="range" class="form-range" id="spacing-slider" min="0" max="100" step="5" value="35">
+                <input type="range" class="form-range" id="spacing-slider" min="0" max="100" step="5" value="30">
               </div>
               <div class="col-4" style="margin-top: -8px">
-                <input type="text" class="form-control" disabled id="spacing-slider-value" value="35">
+                <input type="text" class="form-control" disabled id="spacing-slider-value" value="30">
               </div>
             </div>
           </div>

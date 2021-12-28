@@ -17,8 +17,8 @@ interface GeneratorOptions {
 
 const defaultOptions: GeneratorOptions = {
     pageSize: "A4",
-    marginSize: 35,
-    spacingBetweenElements: 35,
+    marginSize: 30,
+    spacingBetweenElements: 30,
     omitFullPageMargin: true,
     optimizeForFax: false
 }
@@ -37,6 +37,8 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
     const availableWidth = fullPageWidth - (marginSize * 2);
     const availableHeightPerPage = fullPageHeight - marginSize; // full height minus bottom margin, top is included in y pos calculation
+
+    const fullPageAspectRatio = fullPageHeight / fullPageWidth;
 
     // -----------------------
     // Pre-process input files
@@ -60,12 +62,18 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
         console.log(`Processing ${inputFile}`);
         
         const size = imageSize(inputFile);
+
+        const imageAspectRatio = size.height / size.width;
+        const isImageFullPage = Math.abs(imageAspectRatio - fullPageAspectRatio) <= 0.02;
+        const imageUsesFullPage = omitFullPageMargin && isImageFullPage;
+        if (imageUsesFullPage) console.log("Using full page size");
+
         const scaledHeight = size.height * (availableWidth / size.width);
         const requiredHeight = Math.ceil(Math.min(availableHeightPerPage, scaledHeight));
         console.debug(`Original size: ${size.width} x ${size.height}, required height: ${requiredHeight} pt`);
         
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
-        if (requiredHeight > heightAvailableOnCurrentPage) {
+        if (imageUsesFullPage || requiredHeight > heightAvailableOnCurrentPage) {
             console.log("Starting next page");
             doc.addPage({ size: pageSize, margin: 0 });
             currentYPosition = marginSize;
@@ -87,8 +95,12 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
             processedImage = inputFile;
         }
         
-        doc.image(processedImage, marginSize, currentYPosition, { fit: [availableWidth, requiredHeight] });
-        if (optimizeForFax) {
+        const xOffset = imageUsesFullPage ? 0 : marginSize;
+        const yOffset = imageUsesFullPage ? 0 : currentYPosition;
+        const fit: [number, number] = imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [availableWidth, requiredHeight];
+        doc.image(processedImage, xOffset, yOffset, { fit });
+
+        if (optimizeForFax) { // remove temp image from IM preproccessing
             await fs.promises.rm(processedImage);
         }
 
