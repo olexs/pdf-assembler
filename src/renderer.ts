@@ -174,11 +174,12 @@ let previousBlobUrl = "";
 async function generateTempPDF() {
     document.getElementById("preview-iframe").style.display = "none";
     document.getElementById("preview-spinner").style.display = "block";
+    document.getElementById("progressbar").style.width = `0%`;
 
     if (previousBlobUrl) window.URL.revokeObjectURL(previousBlobUrl);
     
     const options = readOptionsFromUI();
-    const pdfDataUrl = await generatePdf([...inputFiles], options);
+    const pdfDataUrl = await generatePdf([...inputFiles], options, updateProgress);
     showPreview(pdfDataUrl + "#view=FitH&toolbar=0");
 
     localStorage.setItem("generator-preferences", JSON.stringify(options));
@@ -194,9 +195,17 @@ function readOptionsFromUI(): Partial<GeneratorOptions> {
     }
 }
 
+function updateProgress(currentIndex: number): void {
+    if (document.getElementById("progressbar")) {
+        const percent = Math.round((currentIndex + 1) / inputFiles.length * 100);
+        document.getElementById("progressbar").style.width = `${percent}%`;
+    }
+}
+
 function showPreview(pdfDataUrl: string) {
     document.getElementById("preview-spinner").style.display = "none";
     document.getElementById("preview-iframe").style.display = "block";
+
     (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl;
 }
 

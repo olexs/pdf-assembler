@@ -23,7 +23,7 @@ const defaultOptions: GeneratorOptions = {
     optimizeForFax: false
 }
 
-async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOptions>): Promise<string> {
+async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
     //  Setup
     // -------
@@ -32,6 +32,8 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
     // https://pdfkit.org/docs/paper_sizes.html, all numbers in PostScript points
     const fullPageWidth = 595.28;
     const fullPageHeight = 841.89;
+
+    const magickMaxSize = `${Math.round(fullPageWidth * 2)}x${Math.round(fullPageHeight * 2)}`;
 
     const availableWidth = fullPageWidth - (marginSize * 2);
     const availableHeightPerPage = fullPageHeight - marginSize; // full height minus bottom margin, top is included in y pos calculation
@@ -50,6 +52,7 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
     let currentYPosition = availableHeightPerPage;
 
     console.debug("---");
+    let currentIndex = 0;
     while (inputFiles.length > 0) {
         const inputFile = inputFiles.shift();
         console.log(`Processing ${inputFile}`);
@@ -72,7 +75,7 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
             console.log("temp file for", inputFile, ":", tempFile);
 
             try {
-                await exec(`magick convert "${inputFile}" -colorspace gray ^( +clone -blur 5,5 ^) -compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`);
+                await exec(`magick convert "${inputFile}" -resize ${magickMaxSize} -colorspace gray ^( +clone -blur 5,5 ^) -compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`);
             } catch(e: any) {
                 console.error(e);
             }
@@ -88,6 +91,9 @@ async function generatePdf(inputFiles: string[], options?: Partial<GeneratorOpti
         }
 
         currentYPosition += (requiredHeight + spacingBetweenElements);
+
+        updateProgress(currentIndex);
+        currentIndex++;
 
         console.debug(`Placed image on page`);
         console.debug(`Height still available: ${availableHeightPerPage - currentYPosition} pt`);

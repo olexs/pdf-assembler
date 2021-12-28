@@ -32,6 +32,17 @@
             </button>
           </div>
 
+          <h4>Ausgabe</h4>
+
+          <div style="background: #eee; border-radius: 4px;" class="px-2 py-2 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" value="" id="optimize-for-fax">
+              <label class="form-check-label" for="optimize-for-fax">
+                Für Faxversand optimieren
+              </label>
+            </div>
+          </div>
+
           <h4>Seiteneinstellungen</h4>
 
           <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
@@ -64,28 +75,17 @@
             </div>
           </div>
 
-          <h4>Ausgabe</h4>
-
-          <div style="background: #eee; border-radius: 4px;" class="px-2 py-2 mb-2">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" value="" id="optimize-for-fax">
-              <label class="form-check-label" for="optimize-for-fax">
-                Für Faxversand optimieren
-              </label>
-            </div>
-          </div>
-
         </div>
         <div class="col-8 px-2 py-0">
 
           <h4>Vorschau</h4>
 
           <div class="my-2" id="preview-spinner" style="background: #eee; border-radius: 4px; height: calc(100vh - 93px); text-align: center;">
-            <div class="spinner-border text-secondary" 
-                 role="status" 
-                 style="position: relative; margin-top: 100px; width: 150px; height: 150px;">
-              <span class="visually-hidden">Loading...</span>
+            <div style="height: 300px"></div>
+            <div class="progress mb-4" style="width: 500px; margin: auto; background: #ccc">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar" style="width: 0%"></div>
             </div>
+            <b>Erstelle Vorschau...</b>
           </div>
 
           <iframe id="preview-iframe" 
