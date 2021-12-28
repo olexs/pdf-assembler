@@ -5,83 +5,74 @@ import { ipcRenderer } from 'electron';
 import { generatePdf, GeneratorOptions } from './pdfGenerator';
 import sharp from 'sharp';
 
-ipcRenderer.on("inputFiles", (_event, data) => processInputFiles(data as string[]));
-let inputFiles: string[] = ["C:/Dev/image-tool-electron/input/IMG_9402.JPG", "C:/Dev/image-tool-electron/input/IMG_9403.JPG"];
+/*
+ * Helpers
+ */
 
-async function processInputFiles(newInputFiles: string[]) {
-    if (newInputFiles.length === 0) {
-        console.error("Renderer: No input files provided!");
-    } else {
-        console.log(`Renderer: Processing ${newInputFiles.length} input files`);
-        const previews = await Promise.all(newInputFiles.map(async (file, index) => { return await generateInputFilePreview(file, index, newInputFiles.length) }));
-        document.getElementById("input-list").innerHTML = previews.join("");
-    }
-    inputFiles = newInputFiles;
+function getInput(id: string): HTMLInputElement {
+    return document.getElementById(id) as HTMLInputElement;
+}
 
+/*
+ * Initialization
+ */
+
+window.addEventListener("DOMContentLoaded", () => {
     loadSavedOptions();
-    registerChangeListeners();
-
-    if (inputFiles.length > 0)
-        generateTempPDF();
-}
-
-function registerChangeListeners(): void {
-    document.getElementById("save-button").onclick = savePDF;
-
-    (<HTMLInputElement>document.getElementById("margin-slider")).onchange = generateTempPDF;
-    (<HTMLInputElement>document.getElementById("margin-slider")).oninput = () => { 
-        (<HTMLInputElement>document.getElementById("margin-slider-value")).value = (<HTMLInputElement>document.getElementById("margin-slider")).value;
-    };
-    (<HTMLInputElement>document.getElementById("spacing-slider")).onchange = generateTempPDF;
-    (<HTMLInputElement>document.getElementById("spacing-slider")).oninput = () => { 
-        (<HTMLInputElement>document.getElementById("spacing-slider-value")).value = (<HTMLInputElement>document.getElementById("spacing-slider")).value;
-    };
-    (<HTMLInputElement>document.getElementById("omit-full-page-margin")).onchange = generateTempPDF;
-    (<HTMLInputElement>document.getElementById("optimize-for-fax")).onchange = generateTempPDF;
-}
-
-function readFormData(): Partial<GeneratorOptions> {
-    return {
-        marginSize: parseInt((<HTMLInputElement>document.getElementById("margin-slider")).value) || 35,
-        spacingBetweenElements: parseInt((<HTMLInputElement>document.getElementById("spacing-slider")).value) || 35,
-        omitFullPageMargin: (<HTMLInputElement>document.getElementById("omit-full-page-margin")).checked,
-        optimizeForFax: (<HTMLInputElement>document.getElementById("optimize-for-fax")).checked,
-    }
-}
+    registerStaticChangeListeners();
+});
 
 function loadSavedOptions(): void {
     const savedOptionsString = localStorage.getItem("generator-preferences");
 
     if (savedOptionsString) {
         const savedOptions = JSON.parse(savedOptionsString) as GeneratorOptions;
-        (<HTMLInputElement>document.getElementById("margin-slider")).value = savedOptions.marginSize.toString();
-        (<HTMLInputElement>document.getElementById("margin-slider-value")).value = savedOptions.marginSize.toString();
-        (<HTMLInputElement>document.getElementById("spacing-slider")).value = savedOptions.spacingBetweenElements.toString();
-        (<HTMLInputElement>document.getElementById("spacing-slider-value")).value = savedOptions.spacingBetweenElements.toString();
-        (<HTMLInputElement>document.getElementById("omit-full-page-margin")).checked = savedOptions.omitFullPageMargin;
-        (<HTMLInputElement>document.getElementById("optimize-for-fax")).checked = savedOptions.optimizeForFax;
+        getInput("margin-slider").value = savedOptions.marginSize.toString();
+        getInput("margin-slider-value").value = savedOptions.marginSize.toString();
+        getInput("spacing-slider").value = savedOptions.spacingBetweenElements.toString();
+        getInput("spacing-slider-value").value = savedOptions.spacingBetweenElements.toString();
+        getInput("omit-full-page-margin").checked = savedOptions.omitFullPageMargin;
+        getInput("optimize-for-fax").checked = savedOptions.optimizeForFax;
     }
 }
 
-async function generateTempPDF() {
-    const options = readFormData();
-    const pdfDataUrl = await generatePdf([...inputFiles], options);
-    showPreview(pdfDataUrl);
+function registerStaticChangeListeners(): void {
+    document.getElementById("save-button").onclick = savePDF;
 
-    localStorage.setItem("generator-preferences", JSON.stringify(options));
+    getInput("margin-slider").onchange = generateTempPDF;
+    getInput("margin-slider").oninput = () => { 
+        getInput("margin-slider-value").value = getInput("margin-slider").value;
+    };
+    getInput("spacing-slider").onchange = generateTempPDF;
+    getInput("spacing-slider").oninput = () => { 
+        getInput("spacing-slider-value").value = getInput("spacing-slider").value;
+    };
+    getInput("omit-full-page-margin").onchange = generateTempPDF;
+    getInput("optimize-for-fax").onchange = generateTempPDF;
 }
 
-function showPreview(pdfDataUrl: string) {
-    document.getElementById("preview-spinner").style.display = "none";
-    document.getElementById("preview-iframe").style.display = "block";
-    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl + "#toolbar=0&view=FitH";
+/*
+ * Input processing and input preview
+ */
+
+let inputFiles: string[] = [];
+ipcRenderer.on("inputFiles", (_event, data) => processInputFiles(data as string[]));
+
+async function processInputFiles(newInputFiles: string[]) {
+    if (newInputFiles.length === 0) {
+        console.error("Renderer: No input files provided!");
+    } else {
+        console.log(`Renderer: Processing ${newInputFiles.length} input files`);
+        const previews = await Promise.all(newInputFiles.map(async (file, index) => await generateInputThumbnail(file, index, newInputFiles.length)));
+        document.getElementById("input-list").innerHTML = previews.join("");
+    }
+
+    inputFiles = newInputFiles;    
+
+    if (inputFiles.length > 0) generateTempPDF();
 }
 
-async function savePDF() {
-    console.log("TODO: actually save some shit here");    
-}
-
-async function generateInputFilePreview(file: string, index: number, totalImages: number): Promise<string> {
+async function generateInputThumbnail(file: string, index: number, totalImages: number): Promise<string> {
     const imageThumbnail = await sharp(file)
         .resize(128, 64, { fit: 'contain', background: "white" })
         .toFormat("jpg")
@@ -120,5 +111,43 @@ async function generateInputFilePreview(file: string, index: number, totalImages
         </div>
     </li>`;
 }
+
+/*
+ * PDF generation
+ */
+
+async function generateTempPDF() {
+    const options = readOptionsFromUI();
+    const pdfDataUrl = await generatePdf([...inputFiles], options);
+    console.log("PDF data: string size: " + pdfDataUrl.length);
+    showPreview(pdfDataUrl);
+
+    localStorage.setItem("generator-preferences", JSON.stringify(options));
+}
+
+function readOptionsFromUI(): Partial<GeneratorOptions> {
+    return {
+        marginSize: parseInt(getInput("margin-slider").value) || 35,
+        spacingBetweenElements: parseInt(getInput("spacing-slider").value) || 35,
+        omitFullPageMargin: getInput("omit-full-page-margin").checked,
+        optimizeForFax: getInput("optimize-for-fax").checked,
+    }
+}
+
+function showPreview(pdfDataUrl: string) {
+    document.getElementById("preview-spinner").style.display = "none";
+    document.getElementById("preview-iframe").style.display = "block";
+    (<HTMLIFrameElement>document.getElementById("preview-iframe")).src = pdfDataUrl + "#toolbar=0&view=FitH";
+}
+
+/*
+ * Result saving
+ */
+
+async function savePDF() {
+    console.log("TODO: actually save some shit here");    
+}
+
+
 
 
