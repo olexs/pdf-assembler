@@ -33,7 +33,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     const fullPageWidth = 595.28;
     const fullPageHeight = 841.89;
 
-    const magickMaxSize = `${Math.round(fullPageWidth * 2)}x${Math.round(fullPageHeight * 2)}`;
+    const magickMaxSize = `${Math.round(fullPageWidth * 3)}x${Math.round(fullPageHeight * 3)}`;
 
     const availableWidth = fullPageWidth - (marginSize * 2);
     const availableHeightPerPage = fullPageHeight - marginSize; // full height minus bottom margin, top is included in y pos calculation
@@ -42,6 +42,8 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     // Pre-process input files
     // -----------------------
     console.log(`Generator: processing ${inputFiles.length} input files`);
+
+    console.debug("Max size", magickMaxSize);
 
     // -------------------
     // Generate output PDF
