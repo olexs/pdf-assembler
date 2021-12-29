@@ -1,6 +1,6 @@
 {
-  "name": "image-tool-electron",
-  "productName": "Olexs PDF Helfer",
+  "name": "pdf-assembler",
+  "productName": "PDF Assembler",
   "version": "1.0.0",
   "description": "Generator für PDF-Dateien",
   "main": ".webpack/main",
