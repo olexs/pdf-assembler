@@ -21,3 +21,9 @@ Create a shortcut to the generated .exe file and place it in the SendTo folder (
 - ImageMagick
 - PDFkit
 - Bootstrap and Bootstrap-Icons
+
+## Open TODOs
+
+- [ ] Internationalization (currently all texts are in German)
+- [ ] Post-install hook handler for Squirrel to add "SendTo" shortcut and close the app
+- [ ] Icon
