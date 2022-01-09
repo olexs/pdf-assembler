@@ -64,7 +64,8 @@ async function showSaveDialog(window: BrowserWindow, inputFile: string) {
   const newFilename = inputFile + "-kombiniert.pdf";
   const result = await dialog.showSaveDialog(window, {
     title: "PDF speichern als...",
-    defaultPath: newFilename
+    defaultPath: newFilename,
+    filters: [ { name: "PDF-Datei", extensions: ["pdf"] } ] 
   });
   if (!result.canceled && result.filePath) {
     window.webContents.send("saveDialogConfirmed", result.filePath);
