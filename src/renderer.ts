@@ -10,6 +10,7 @@ import * as child from 'child_process';
 import util from 'util';
 import tempy from 'tempy';
 const exec = util.promisify(child.exec);
+import { init, translate, translateHtml } from './i18n';
 
 /*
  * Helpers
@@ -20,10 +21,18 @@ function getInput(id: string): HTMLInputElement {
 }
 
 /*
+ * I18n
+ */
+ipcRenderer.on("initI18n", async (_event, data) => {
+    await init(data as string);
+    await translateHtml(); 
+});
+
+/*
  * Initialization
  */
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
     loadSavedOptions();
     registerStaticCallbacks();
 });
@@ -105,7 +114,7 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
     let page = "";
     const pageMatch = filename.match(/\.pdf-[0-9]+$/);
     if (pageMatch && pageMatch[0])
-        page = "Seite " + (parseInt(pageMatch[0].replace(".pdf-", "")) + 1);
+        page = translate('page') + " " + (parseInt(pageMatch[0].replace(".pdf-", "")) + 1);
     
     return `<li class="list-group-item d-flex flex-row px-2">
         <img src="${imageThumbnailSrc}" alt="${filename}" class="me-2">
@@ -114,21 +123,21 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
             <div class="mt-2">
                 ${page}
                 <button type="button" 
-                        title="Entfernen"
+                        title="${translate('button_delete')}"
                         id="btn-input-delete-${index}" 
                         class="btn btn-danger float-end btn-sm ms-1"
                         ${totalImages <= 1 ? 'disabled' : ''}>
                     <i class="bi-trash"></i>
                 </button>
                 <button type="button" 
-                        title="Nach unten bewegen"
+                        title="${translate('button_down')}"
                         id="btn-input-down-${index}" 
                         class="btn btn-secondary float-end btn-sm ms-1" 
                         ${index === totalImages - 1 ? 'disabled' : ''}>
                     <i class="bi-arrow-down"></i>
                 </button>
                 <button type="button" 
-                        title="Nach oben bewegen"
+                        title="${translate('button_up')}"
                         id="btn-input-up-${index}" 
                         class="btn btn-secondary float-end btn-sm ms-1" 
                         ${index === 0 ? 'disabled' : ''}>
@@ -149,7 +158,7 @@ function registerThumbnailCallbacks() {
 
 function deleteInput(index: number): void {
     const filename = path.basename(inputFiles[index], path.extname(inputFiles[index]));
-    if (!confirm(`${filename} wirklich aus den Eingaben entfernen?`)) return;
+    if (!confirm(translate("confirm_delete", { filename }))) return;
 
     inputFiles.splice(index, 1);
 

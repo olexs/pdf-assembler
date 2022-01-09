@@ -24,6 +24,6 @@ Create a shortcut to the generated .exe file and place it in the SendTo folder (
 
 ## Open TODOs
 
-- [ ] Internationalization (currently all texts are in German)
-- [ ] Post-install hook handler for Squirrel to add "SendTo" shortcut and close the app
 - [ ] Icon
+- [ ] Post-install hook handler for Squirrel to add "SendTo" shortcut and close the app
+- [ ] CI build and Github releases

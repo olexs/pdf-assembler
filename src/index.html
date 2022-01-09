@@ -2,13 +2,13 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>PDF Helfer</title>
+    <title data-i18n="title">PDF Helfer</title>
   </head>
   <body>
     <div class="container-fluid gx-1">
       <div class="row row-cols-2 gx-0">
         <div class="col-4 px-2 py-0">
-          <h4>Eingabe</h4>
+          <h4 data-i18n="header_input">Eingabe</h4>
           <ul style="background: #eee; 
                      border-radius: 4px; 
                      border: 2px solid #eee;
@@ -18,37 +18,37 @@
                class="mb-2 list-group"
                id="input-list">
             <div class="spinner-border text-secondary" style="width: 100px; height: 100px; margin: auto;">
-              <span class="visually-hidden">Loading...</span>
+              <span class="visually-hidden" data-i18n="loading">Loading...</span>
             </div>
           </ul>
 
           <div class="d-flex flex-row mb-2">
             <button class="flex-fill btn btn-secondary" id="btn-input-sort">
               <i class="bi bi-sort-alpha-down"></i>
-              Sortieren
+              <span data-i18n="button_sort">Sortieren</span>
             </button>
             &nbsp;
             <button class="flex-fill btn btn-secondary" id="btn-input-add">
               <i class="bi bi-file-earmark-plus"></i>
-              Hinzufügen...
+              <span data-i18n="button_add">Hinzufügen...</span>
             </button>
           </div>
 
-          <h4>Ausgabe</h4>
+          <h4 data-i18n="header_output">Ausgabe</h4>
 
           <div style="background: #eee; border-radius: 4px;" class="px-2 py-2 mb-2">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" value="" id="optimize-for-fax">
-              <label class="form-check-label" for="optimize-for-fax">
+              <label class="form-check-label" for="optimize-for-fax" data-i18n="checkbox_optimize_for_fax">
                 Für Faxversand optimieren
               </label>
             </div>
           </div>
 
-          <h4>Seiteneinstellungen</h4>
+          <h4 data-i18n="header_page_settings">Seiteneinstellungen</h4>
 
           <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
-            <label for="margin-slider" class="form-label">Ränder:</label>
+            <label for="margin-slider" class="form-label" data-i18n="slider_margins">Ränder:</label>
             <div class="row mb-1">
               <div class="col-8 pe-0">
                 <input type="range" class="form-range" id="margin-slider" min="0" max="100" step="5" value="30">
@@ -59,14 +59,14 @@
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" value="" id="omit-full-page-margin" checked>
-              <label class="form-check-label" for="omit-full-page-margin">
+              <label class="form-check-label" for="omit-full-page-margin" data-i18n="checkbox_omit_full_page_margin">
                 Ränder bei großen Bildern weglassen
               </label>
             </div>
           </div>
 
           <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
-            <label for="spacing-slider" class="form-label">Abstand zwischen Bildern:</label>
+            <label for="spacing-slider" class="form-label" data-i18n="slider_spacing">Abstand zwischen Bildern:</label>
             <div class="row mb-1">
               <div class="col-8 pe-0">
                 <input type="range" class="form-range" id="spacing-slider" min="0" max="100" step="5" value="30">
@@ -80,14 +80,14 @@
         </div>
         <div class="col-8 px-2 py-0">
 
-          <h4>Vorschau</h4>
+          <h4 data-i18n="header_preview">Vorschau</h4>
 
           <div class="my-2" id="preview-spinner" style="background: #eee; border-radius: 4px; height: calc(100vh - 93px); text-align: center;">
             <div style="height: 300px"></div>
             <div class="progress mb-4" style="width: 500px; margin: auto; background: #ccc">
               <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar" style="width: 0%"></div>
             </div>
-            <b>Erstelle Vorschau...</b>
+            <b data-i18n="loading_preview">Erstelle Vorschau...</b>
           </div>
 
           <iframe id="preview-iframe" 
@@ -102,12 +102,13 @@
           <div>
             <button class="btn btn-primary float-end" id="save-button" disabled>
               <i class="bi-save"></i>
-              &nbsp;PDF speichern...
+              &nbsp;
+              <span data-i18n="button_save">PDF speichern...</span>
             </button>
 
             <div class="form-check form-switch float-end me-4 mt-2">
               <input class="form-check-input" type="checkbox" value="" id="exit-after-saving" checked>
-              <label class="form-check-label" for="exit-after-saving">
+              <label class="form-check-label" for="exit-after-saving" data-i18n="checkbox_exit_after_saving">
                 Nach Speichern schließen
               </label>
             </div>
