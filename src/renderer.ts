@@ -11,6 +11,7 @@ import util from 'util';
 import tempy from 'tempy';
 const exec = util.promisify(child.exec);
 import { init, translate, translateHtml } from './i18n';
+import Sortable from 'sortablejs';
 
 /*
  * Helpers
@@ -35,6 +36,7 @@ ipcRenderer.on("initI18n", async (_event, data) => {
 window.addEventListener("DOMContentLoaded", async () => {
     loadSavedOptions();
     registerStaticCallbacks();
+    initSortableJs();
 });
 
 function loadSavedOptions(): void {
@@ -82,6 +84,19 @@ function registerStaticCallbacks(): void {
     (document.getElementById("select-pagesize") as HTMLSelectElement).onchange = generateTempPDF;
 }
 
+function initSortableJs() {
+    const sortContainer = document.getElementById("input-list");
+    const sortable = Sortable.create(sortContainer, {
+        handle: ".sortable-handle",
+        onUpdate: (event) => {
+            const draggedElement = inputFiles[event.oldDraggableIndex];
+            inputFiles.splice(event.oldDraggableIndex, 1);
+            inputFiles.splice(event.newDraggableIndex, 0, draggedElement);
+            processInputFiles(inputFiles);
+        }
+    });
+}
+
 /*
  * Input processing and input preview
  */
@@ -126,39 +141,24 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
         <img src="${imageThumbnailSrc}" alt="${filename}" class="me-2">
         <div class="flex-fill" style="min-width: 0">
             <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-weight: bold">${filename}</div>
-            <div class="mt-2">
-                ${page}
-                <button type="button" 
-                        title="${translate('button_delete')}"
-                        id="btn-input-delete-${index}" 
-                        class="btn btn-danger float-end btn-sm ms-1"
-                        ${totalImages <= 1 ? 'disabled' : ''}>
-                    <i class="bi-trash"></i>
-                </button>
-                <button type="button" 
-                        title="${translate('button_down')}"
-                        id="btn-input-down-${index}" 
-                        class="btn btn-secondary float-end btn-sm ms-1" 
-                        ${index === totalImages - 1 ? 'disabled' : ''}>
-                    <i class="bi-arrow-down"></i>
-                </button>
-                <button type="button" 
-                        title="${translate('button_up')}"
-                        id="btn-input-up-${index}" 
-                        class="btn btn-secondary float-end btn-sm ms-1" 
-                        ${index === 0 ? 'disabled' : ''}>
-                    <i class="bi-arrow-up"></i>
-                </button>
-            </div>
+            <div class="mt-2">${page}</div>
+        </div>
+        <div class="d-flex flex-row align-items-center">
+            <button type="button" 
+                    title="${translate('button_delete')}"
+                    id="btn-input-delete-${index}" 
+                    class="btn btn-danger float-end btn-sm ms-1"
+                    ${totalImages <= 1 ? 'disabled' : ''}>
+                <i class="bi-trash"></i>
+            </button>
+            <span class="sortable-handle fs-2 ms-2"><i class="bi bi-list" title="${translate("drag_handle")}"></i></span>
         </div>
     </li>`;
 }
 
 function registerThumbnailCallbacks() {
     for (let index = 0; index < inputFiles.length; index++) {
-        document.getElementById(`btn-input-delete-${index}`).onclick = () => deleteInput(index);     
-        document.getElementById(`btn-input-up-${index}`).onclick = () => moveInputUp(index);     
-        document.getElementById(`btn-input-down-${index}`).onclick = () => moveInputDown(index);     
+        document.getElementById(`btn-input-delete-${index}`).onclick = () => deleteInput(index);       
     }
 }
 
@@ -167,26 +167,6 @@ function deleteInput(index: number): void {
     if (!confirm(translate("confirm_delete", { filename }))) return;
 
     inputFiles.splice(index, 1);
-
-    processInputFiles(inputFiles);
-}
-
-function moveInputUp(index: number): void {
-    if (index <= 0) return;
-
-    const temp = inputFiles[index];
-    inputFiles[index] = inputFiles[index - 1];
-    inputFiles[index - 1] = temp;
-
-    processInputFiles(inputFiles);
-}
-
-function moveInputDown(index: number): void {
-    if (index >= inputFiles.length - 1) return;
-
-    const temp = inputFiles[index];
-    inputFiles[index] = inputFiles[index + 1];
-    inputFiles[index + 1] = temp;
 
     processInputFiles(inputFiles);
 }
