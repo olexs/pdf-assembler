@@ -32,7 +32,10 @@ async function init(language: string = "en"): Promise<void> {
                     "button_down": "Move down",
                     "button_up": "Move up",
                     "page": "Page",
-                    "confirm_delete": "Delete {{filename}} from the list of inputs?"                
+                    "confirm_delete": "Delete {{filename}} from the list of inputs?",
+                    "page_size": "Page layout:",
+                    "orientation_portrait": "Portrait",
+                    "orientation_landscape": "Landscape",             
                 }
             },
             de: {
@@ -58,10 +61,13 @@ async function init(language: string = "en"): Promise<void> {
                     "add_dialog_title": "Eingabe hinzufügen...",
                     "add_dialog_file_type": "Unterstützte Dateiformate",
                     "button_delete": "Entfernen",
-                    "button_down": "Nach unten beewgen",
+                    "button_down": "Nach unten bewegen",
                     "button_up": "Nach oben bewegen",
                     "page": "Seite",
-                    "confirm_delete": "{{filename}} wirklich aus den Eingaben entfernen?"
+                    "confirm_delete": "{{filename}} wirklich aus den Eingaben entfernen?",
+                    "page_size": "Seitengröße:",
+                    "orientation_portrait": "Hochformat",
+                    "orientation_landscape": "Querformat",
                 }
             }
         }
@@ -73,6 +79,11 @@ async function translateHtml(): Promise<void> {
         const i18nkey = element.attributes.getNamedItem("data-i18n");
         if (i18nkey && i18nkey.value) {
             element.textContent = i18next.t(i18nkey.value);
+        }
+
+        const i18nTitleKey = element.attributes.getNamedItem("data-i18n-title");
+        if (i18nTitleKey && i18nTitleKey.value) {
+            element.title = i18next.t(i18nTitleKey.value);
         }
     });
 }

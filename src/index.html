@@ -12,7 +12,7 @@
           <ul style="background: #eee; 
                      border-radius: 4px; 
                      border: 2px solid #eee;
-                     height: calc(100vh - 452px); 
+                     height: calc(100vh - 514px); 
                      overflow-y: auto;
                      overflow-x: hidden;" 
                class="mb-2 list-group"
@@ -46,6 +46,34 @@
           </div>
 
           <h4 data-i18n="header_page_settings">Seiteneinstellungen</h4>
+
+          <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
+            
+            <div class="mb-1 mt-1 d-flex flex-row">
+              <div class="flex-fill mt-1">
+                <label for="margin-slider" class="form-label" data-i18n="page_size">Seitengröße:</label>
+              </div>
+              <div>
+                <select class="form-select" id="select-pagesize">
+                  <option value="A4">DIN A4</option>
+                  <option value="LETTER">US Letter</option>
+                </select>
+              </div>
+              <div class="ms-2">
+                <div class="btn-group">
+                  <input type="radio" class="btn-check" name="radio-orientation" id="radio-orientation-portrait" autocomplete="off" checked>
+                  <label class="btn btn-outline-primary" for="radio-orientation-portrait" title="Hochformat" data-i18n-title="orientation_portrait">
+                    <i class="bi bi-phone"></i>
+                  </label>
+                  <input type="radio" class="btn-check" name="radio-orientation" id="radio-orientation-landscape" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="radio-orientation-landscape" title="Querformat" data-i18n-title="orientation_landscape">
+                    <i class="bi bi-phone-landscape"></i>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+          </div>
 
           <div style="background: #eee; border-radius: 4px;" class="px-2 py-1 mb-2">
             <label for="margin-slider" class="form-label" data-i18n="slider_margins">Ränder:</label>

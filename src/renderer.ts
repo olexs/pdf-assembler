@@ -48,7 +48,9 @@ function loadSavedOptions(): void {
         getInput("spacing-slider-value").value = savedOptions.spacingBetweenElements.toString() || "30";
         getInput("omit-full-page-margin").checked = savedOptions.omitFullPageMargin || true;
         getInput("optimize-for-fax").checked = savedOptions.optimizeForFax || false;
-        getInput("exit-after-saving").checked = savedOptions.exitAfterSaving || false;
+        getInput("radio-orientation-portrait").checked = savedOptions.orientation === "portrait" || !savedOptions.orientation;
+        getInput("radio-orientation-landscape").checked = savedOptions.orientation === "landscape";
+        (document.getElementById("select-pagesize") as HTMLSelectElement).value = savedOptions.pageSize || "A4";
     }
 }
 
@@ -74,6 +76,10 @@ function registerStaticCallbacks(): void {
         options.exitAfterSaving = getInput("exit-after-saving").checked;
         localStorage.setItem("generator-preferences", JSON.stringify(options));
     };
+
+    getInput("radio-orientation-portrait").onclick = generateTempPDF;
+    getInput("radio-orientation-landscape").onclick = generateTempPDF;
+    (document.getElementById("select-pagesize") as HTMLSelectElement).onchange = generateTempPDF;
 }
 
 /*
@@ -233,8 +239,15 @@ function readOptionsFromUI(): Partial<GeneratorOptions> {
         spacingBetweenElements: parseInt(getInput("spacing-slider").value) || 30,
         omitFullPageMargin: getInput("omit-full-page-margin").checked,
         optimizeForFax: getInput("optimize-for-fax").checked,
-        exitAfterSaving: getInput("exit-after-saving").checked
+        exitAfterSaving: getInput("exit-after-saving").checked,
+        pageSize: (document.getElementById("select-pagesize") as HTMLSelectElement).value as "A4" | "LETTER",
+        orientation: getSelectedOrientation()
     }
+}
+
+function getSelectedOrientation(): "portrait" | "landscape" {
+    if (getInput("radio-orientation-portrait").checked) return "portrait";
+    else return "landscape";
 }
 
 function updateProgress(currentIndex: number): void {

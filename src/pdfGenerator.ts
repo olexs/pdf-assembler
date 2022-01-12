@@ -8,7 +8,8 @@ import util from 'util';
 const exec = util.promisify(child.exec);
 
 interface GeneratorOptions {
-    pageSize: "A4",
+    pageSize: "A4" | "LETTER",
+    orientation: "portrait" | "landscape",
     marginSize: number,
     spacingBetweenElements: number,
     omitFullPageMargin: boolean,
@@ -18,6 +19,7 @@ interface GeneratorOptions {
 
 const defaultOptions: GeneratorOptions = {
     pageSize: "A4",
+    orientation: "portrait",
     marginSize: 30,
     spacingBetweenElements: 30,
     omitFullPageMargin: true,
@@ -25,15 +27,24 @@ const defaultOptions: GeneratorOptions = {
     exitAfterSaving: true
 }
 
+// https://pdfkit.org/docs/paper_sizes.html, all numbers in PostScript points
+const pageSizesPortrait = {
+    "A4": [595.28, 841.89],
+    "LETTER": [612, 792],
+}
+
 async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
     //  Setup
     // -------
-    const { pageSize, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } = options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
+    const { pageSize, orientation, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } = 
+        options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
+    
+    const widthIndex = orientation === "portrait" ? 0 : 1;
+    const heightIndex = orientation === "portrait" ? 1 : 0;
 
-    // https://pdfkit.org/docs/paper_sizes.html, all numbers in PostScript points
-    const fullPageWidth = 595.28;
-    const fullPageHeight = 841.89;
+    const fullPageWidth = pageSizesPortrait[pageSize][widthIndex];
+    const fullPageHeight = pageSizesPortrait[pageSize][heightIndex];
 
     const magickMaxSize = `${Math.round(fullPageWidth * 3)}x${Math.round(fullPageHeight * 3)}`;
 
@@ -52,7 +63,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     // -------------------
     // Generate output PDF
     // -------------------
-    const doc = new pdfkit({ autoFirstPage: false, size: pageSize });
+    const doc = new pdfkit({ autoFirstPage: false, size: pageSize, layout: orientation });
     const stream = doc.pipe(BlobStream());
 
     let currentYPosition = availableHeightPerPage;
@@ -77,7 +88,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (imageUsesFullPage || requiredHeight > heightAvailableOnCurrentPage) {
             console.log("Starting next page");
-            doc.addPage({ size: pageSize, margin: 0 });
+            doc.addPage({ size: pageSize, margin: 0, layout: orientation });
             currentYPosition = marginSize;
         }
 
