@@ -21,6 +21,7 @@ Create a shortcut to the generated .exe file and place it in the SendTo folder (
 - ImageMagick
 - PDFkit
 - Bootstrap and Bootstrap-Icons
+- Jest
 
 ## Open TODOs
 
