@@ -12,6 +12,7 @@ import tempy from 'tempy';
 const exec = util.promisify(child.exec);
 import { init, translate, translateHtml } from './i18n';
 import Sortable from 'sortablejs';
+import { sortByPreprocessedFilename } from './renderer/sort';
 
 /*
  * Helpers
@@ -105,6 +106,14 @@ let originalInputFiles: string[] = [];
 let inputFiles: string[] = [];
 ipcRenderer.on("inputFiles", async (_event, data) => await addNewInputs(data as string[]));
 
+async function addNewInputs(newInputs: string[]) {
+    originalInputFiles.push(...newInputs);
+    const newPreprocessed = await preprocessInputFiles(newInputs);
+    const sortedPreprocessedInputs = sortByPreprocessedFilename(newPreprocessed);
+    inputFiles.push(...sortedPreprocessedInputs);
+    await processInputFiles(inputFiles);
+}
+
 async function processInputFiles(newInputFiles: string[]) {
     if (newInputFiles.length === 0) {
         console.error("Renderer: No input files provided!");
@@ -172,7 +181,7 @@ function deleteInput(index: number): void {
 }
 
 function sortInputs(): void {
-    inputFiles.sort((a, b) => path.basename(a).localeCompare(path.basename(b)));
+    inputFiles = sortByPreprocessedFilename(inputFiles);
     processInputFiles(inputFiles);
 }
 
@@ -181,13 +190,6 @@ function addInput(): void {
 }
 
 ipcRenderer.on("addDialogConfirmed", async (_event, data) => await addNewInputs(data as string[]));
-
-async function addNewInputs(newInputs: string[]) {
-    originalInputFiles.push(...newInputs);
-    const newPreprocessed = await preprocessInputFiles(newInputs);
-    inputFiles.push(...newPreprocessed)
-    await processInputFiles(inputFiles);
-}
 
 /*
  * PDF generation
