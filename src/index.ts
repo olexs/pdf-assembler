@@ -30,9 +30,11 @@ const createWindow = async (): Promise<void> => {
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  //mainWindow.webContents.openDevTools();
+  const env = process.env.NODE_ENV || 'development';
+  if (env !== 'production')
+    mainWindow.webContents.openDevTools();
+
   mainWindow.removeMenu();
-  //mainWindow.resizable = false;
   mainWindow.setMinimumSize(1200, 800);
 
   mainWindow.webContents.on("did-finish-load", () => {
