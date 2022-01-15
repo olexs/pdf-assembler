@@ -3,6 +3,7 @@ name: Main CI - install, test, make and create release on tag
 on:
   push:
     branches: [ master ]
+    tags: [ "v*.*.*" ]
   pull_request:
     branches: [ master ]
 
