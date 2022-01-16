@@ -6,7 +6,6 @@ import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
 const exec = util.promisify(child.exec);
-import * as jo from 'jpeg-autorotate';
 
 interface GeneratorOptions {
     pageSize: "A4" | "LETTER",
@@ -35,6 +34,12 @@ const pageSizesPortrait = {
 }
 
 const maximumAspectRatioDeviationFromFullPage = 0.05;
+
+// https://exiftool.org/TagNames/EXIF.html, 0x0112 Orientation
+const exifOrientationCodes = {
+    ROTATE_90: 6,
+    ROTATE_270: 8
+}
 
 async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
@@ -79,7 +84,10 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
         const sizeData = imageSize(inputFile);
 
-        const isImageRotated = sizeData.orientation && sizeData.orientation > 4;
+        const isImageRotated = sizeData.orientation 
+            && (sizeData.orientation == exifOrientationCodes.ROTATE_90 
+                || sizeData.orientation === exifOrientationCodes.ROTATE_270);
+
         const imageWidth = !isImageRotated ? sizeData.width : sizeData.height;
         const imageHeight = !isImageRotated ? sizeData.height : sizeData.width;
 
@@ -92,7 +100,8 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
         const scaledHeight = imageHeight * (availableWidth / imageWidth);
         const requiredHeight = Math.ceil(Math.min(availableHeightPerPage, scaledHeight));
-        console.debug(`Original size: ${imageWidth} x ${imageHeight}, required height: ${requiredHeight} pt`);
+        const requiredWidth = requiredHeight / imageAspectRatio;
+        console.debug(`Original size: ${imageWidth} x ${imageHeight}, required size: ${requiredWidth} x ${requiredHeight} pt`);
 
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (imageUsesFullPage || requiredHeight > heightAvailableOnCurrentPage) {
@@ -117,18 +126,36 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
             processedImageFile = inputFile;
         }
 
-        if (isImageRotated) console.debug("Original image is rotated via metadata, fixing...");
-        const imageOrBuffer = isImageRotated
-            ? (await jo.rotate(processedImageFile, { quality: 90 })).buffer
-            : processedImageFile;
-
         const xOffset = imageUsesFullPage ? 0 : marginSize;
         const yOffset = imageUsesFullPage ? 0 : currentYPosition;
 
-        const fit: [number, number] = imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [availableWidth, requiredHeight];
+        const fit: [number, number] = imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [requiredWidth, requiredHeight];
         console.debug("Fitting image in", fit);
 
-        doc.image(imageOrBuffer, xOffset, yOffset, { fit });
+        if (isImageRotated && sizeData.orientation === exifOrientationCodes.ROTATE_90) {
+            console.debug("Image rotation is 90° CW, offsets are", [xOffset, yOffset]);
+            doc.rotate(90, { origin: [xOffset, yOffset] });
+            doc.image(processedImageFile, 
+                xOffset, 
+                yOffset - (imageUsesFullPage ? fullPageWidth : requiredWidth), 
+                { fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth] });
+            doc.rotate(-90, { origin: [xOffset, yOffset] });
+        } else if (isImageRotated && sizeData.orientation === exifOrientationCodes.ROTATE_270) {
+            // 270° CW
+            console.debug("Image rotation is 270° CW, offsets are", [xOffset, yOffset]);
+            doc.rotate(270, { origin: [xOffset, yOffset] });
+            doc.image(processedImageFile, 
+                xOffset - (imageUsesFullPage ? fullPageHeight : requiredHeight), 
+                yOffset, 
+                { fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth] });
+            doc.rotate(-270, { origin: [xOffset, yOffset] });
+        } else {
+            // no or unsupported rotation, place as is
+            doc.image(processedImageFile, 
+                xOffset, 
+                yOffset, 
+                { fit: imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [requiredWidth, requiredHeight] });
+        }
 
         if (optimizeForFax) { // remove temp image from IM preproccessing
             await fs.promises.rm(processedImageFile);
