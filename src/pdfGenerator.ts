@@ -6,6 +6,7 @@ import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
 const exec = util.promisify(child.exec);
+import * as jo from 'jpeg-autorotate';
 
 interface GeneratorOptions {
     pageSize: "A4" | "LETTER",
@@ -33,13 +34,15 @@ const pageSizesPortrait = {
     "LETTER": [612, 792],
 }
 
+const maximumAspectRatioDeviationFromFullPage = 0.05;
+
 async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
     //  Setup
     // -------
-    const { pageSize, orientation, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } = 
+    const { pageSize, orientation, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } =
         options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
-    
+
     const widthIndex = orientation === "portrait" ? 0 : 1;
     const heightIndex = orientation === "portrait" ? 1 : 0;
 
@@ -49,7 +52,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     const magickMaxSize = `${Math.round(fullPageWidth * 3)}x${Math.round(fullPageHeight * 3)}`;
 
     const availableWidth = fullPageWidth - (marginSize * 2);
-    const availableHeightPerPage = fullPageHeight - marginSize; // full height minus bottom margin, top is included in y pos calculation
+    const availableHeightPerPage = fullPageHeight - marginSize * 2;
 
     const fullPageAspectRatio = fullPageHeight / fullPageWidth;
 
@@ -73,18 +76,24 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     while (inputFiles.length > 0) {
         const inputFile = inputFiles.shift();
         console.log(`Processing ${inputFile}`);
-        
-        const size = imageSize(inputFile);
 
-        const imageAspectRatio = size.height / size.width;
-        const isImageFullPage = Math.abs(imageAspectRatio - fullPageAspectRatio) <= 0.02;
+        const sizeData = imageSize(inputFile);
+
+        const isImageRotated = sizeData.orientation && sizeData.orientation > 4;
+        const imageWidth = !isImageRotated ? sizeData.width : sizeData.height;
+        const imageHeight = !isImageRotated ? sizeData.height : sizeData.width;
+
+        const imageAspectRatio = imageHeight / imageWidth;
+        const aspectRatioDeviationFromFullPage = Math.abs(imageAspectRatio - fullPageAspectRatio);
+        const isImageFullPage = aspectRatioDeviationFromFullPage <= maximumAspectRatioDeviationFromFullPage;
         const imageUsesFullPage = omitFullPageMargin && isImageFullPage;
+        console.debug("Deviation from full page ratio:", aspectRatioDeviationFromFullPage);
         if (imageUsesFullPage) console.log("Using full page size");
 
-        const scaledHeight = size.height * (availableWidth / size.width);
+        const scaledHeight = imageHeight * (availableWidth / imageWidth);
         const requiredHeight = Math.ceil(Math.min(availableHeightPerPage, scaledHeight));
-        console.debug(`Original size: ${size.width} x ${size.height}, required height: ${requiredHeight} pt`);
-        
+        console.debug(`Original size: ${imageWidth} x ${imageHeight}, required height: ${requiredHeight} pt`);
+
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (imageUsesFullPage || requiredHeight > heightAvailableOnCurrentPage) {
             console.log("Starting next page");
@@ -92,29 +101,37 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
             currentYPosition = marginSize;
         }
 
-        let processedImage: string;  
+        let processedImageFile: string;
         if (optimizeForFax) {
-            const tempFile = tempy.file({extension: "jpg"});
+            const tempFile = tempy.file({ extension: "jpg" });
             console.log("temp file for", inputFile, ":", tempFile);
 
             try {
                 await exec(`magick convert "${inputFile}" -resize ${magickMaxSize} -colorspace gray ^( +clone -blur 5,5 ^) -compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`);
-            } catch(e: any) {
+            } catch (e: any) {
                 console.error(e);
             }
 
-            processedImage = tempFile;
+            processedImageFile = tempFile;
         } else {
-            processedImage = inputFile;
+            processedImageFile = inputFile;
         }
-        
+
+        if (isImageRotated) console.debug("Original image is rotated via metadata, fixing...");
+        const imageOrBuffer = isImageRotated
+            ? (await jo.rotate(processedImageFile, { quality: 90 })).buffer
+            : processedImageFile;
+
         const xOffset = imageUsesFullPage ? 0 : marginSize;
         const yOffset = imageUsesFullPage ? 0 : currentYPosition;
+
         const fit: [number, number] = imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [availableWidth, requiredHeight];
-        doc.image(processedImage, xOffset, yOffset, { fit });
+        console.debug("Fitting image in", fit);
+
+        doc.image(imageOrBuffer, xOffset, yOffset, { fit });
 
         if (optimizeForFax) { // remove temp image from IM preproccessing
-            await fs.promises.rm(processedImage);
+            await fs.promises.rm(processedImageFile);
         }
 
         currentYPosition += (requiredHeight + spacingBetweenElements);
