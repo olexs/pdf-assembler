@@ -116,7 +116,12 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
             console.log("temp file for", inputFile, ":", tempFile);
 
             try {
-                await exec(`magick convert "${inputFile}" -resize ${magickMaxSize} -colorspace gray ^( +clone -blur 5,5 ^) -compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`);
+                const cmdEscapeChar = process.platform === "win32" ? "^" : "\\";
+                const magickCommand = `magick convert "${inputFile}" -resize ${magickMaxSize} ` +
+                    `-colorspace gray ${cmdEscapeChar}( +clone -blur 5,5 ${cmdEscapeChar}) ` +
+                    `-compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`;
+
+                await exec(magickCommand);
             } catch (e: any) {
                 console.error(e);
             }
