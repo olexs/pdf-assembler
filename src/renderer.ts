@@ -59,6 +59,7 @@ function loadSavedOptions(): void {
 
 function registerStaticCallbacks(): void {
     document.getElementById("save-button").onclick = savePDF;
+    document.getElementById("print-button").onclick = printPDF;
 
     getInput("margin-slider").onchange = generateTempPDF;
     getInput("margin-slider").oninput = () => { 
@@ -213,6 +214,7 @@ async function generateTempPDF() {
     previousBlobUrl = pdfDataUrl;
 
     (<HTMLButtonElement>document.getElementById("save-button")).disabled = false;
+    (<HTMLButtonElement>document.getElementById("print-button")).disabled = false;
 }
 
 function readOptionsFromUI(): Partial<GeneratorOptions> {
@@ -266,4 +268,8 @@ async function finishSaving(chosenFilename: string) {
     if (getInput("exit-after-saving").checked) ipcRenderer.send("exitAfterSavingTriggered");
 }
 
-
+async function printPDF() {
+    const pdfIframe = <HTMLIFrameElement>document.getElementById("preview-iframe");
+    pdfIframe.focus();
+    pdfIframe.contentWindow.print();
+}

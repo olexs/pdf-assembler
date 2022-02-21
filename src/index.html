@@ -142,18 +142,25 @@
         </div>
       </div>
       <div class="px-2 pb-2">
+        <button class="btn btn-secondary float-end ms-2" id="print-button" disabled>
+          <i class="bi-printer"></i>
+          &nbsp;
+          <span data-i18n="button_print">Drucken...</span>
+        </button>
+
         <button class="btn btn-primary float-end" id="save-button" disabled>
           <i class="bi-save"></i>
           &nbsp;
           <span data-i18n="button_save">PDF speichern...</span>
         </button>
 
-        <div class="form-check form-switch float-end me-4 mt-2">
+        <div class="form-check form-switch float-end me-4 ms-4 mt-2">
           <input class="form-check-input" type="checkbox" value="" id="exit-after-saving" checked>
           <label class="form-check-label" for="exit-after-saving" data-i18n="checkbox_exit_after_saving">
             Nach Speichern schließen
           </label>
         </div>
+
       </div>
     </div>
   </body>
