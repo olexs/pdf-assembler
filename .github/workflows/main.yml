@@ -23,12 +23,11 @@ jobs:
     - name: Test
       run: npm test
     - name: Package and make Windows installer
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        npm run make
-        tree out/make /F
-    - name: Create release
+      run: npm run make
+    - name: Create release (only on tag)
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: out/make/squirrel.windows/x64/*.exe
+        generate_release_notes: true
+        draft: true
