@@ -1,8 +1,8 @@
-import i18next from "i18next";
+import {init, t, TOptions} from "i18next";
 
-async function init(language: string = "en"): Promise<void> {
+async function initialize(language = "en"): Promise<void> {
     console.log("Initializing i18next in", language);
-    await i18next.init({
+    await init({
         lng: language,
         fallbackLng: "en",
         resources: {
@@ -78,18 +78,18 @@ async function translateHtml(): Promise<void> {
     Array.from(document.getElementsByTagName("*")).forEach((element: HTMLElement) => {
         const i18nkey = element.attributes.getNamedItem("data-i18n");
         if (i18nkey && i18nkey.value) {
-            element.textContent = i18next.t(i18nkey.value);
+            element.textContent = t(i18nkey.value);
         }
 
         const i18nTitleKey = element.attributes.getNamedItem("data-i18n-title");
         if (i18nTitleKey && i18nTitleKey.value) {
-            element.title = i18next.t(i18nTitleKey.value);
+            element.title = t(i18nTitleKey.value);
         }
     });
 }
 
-function translate(key: string, options?: any): string {
-    return i18next.t(key, options);
+function translate(key: string, options?: unknown): string {
+    return t(key, options as TOptions<object>);
 }
 
-export { init, translateHtml, translate };
+export { initialize, translateHtml, translate };

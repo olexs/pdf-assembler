@@ -10,9 +10,10 @@ import * as child from 'child_process';
 import util from 'util';
 import tempy from 'tempy';
 const exec = util.promisify(child.exec);
-import { init, translate, translateHtml } from './i18n';
-import Sortable from 'sortablejs';
+import { initialize, translate, translateHtml } from './i18n';
 import { sortByPreprocessedFilename } from './renderer/sort';
+// eslint-disable-next-line import/no-named-as-default
+import Sortable from 'sortablejs';
 
 /*
  * Helpers
@@ -26,7 +27,7 @@ function getInput(id: string): HTMLInputElement {
  * I18n
  */
 ipcRenderer.on("initI18n", async (_event, data) => {
-    await init(data as string);
+    await initialize(data as string);
     await translateHtml(); 
 });
 
@@ -88,7 +89,7 @@ function registerStaticCallbacks(): void {
 
 function initSortableJs() {
     const sortContainer = document.getElementById("input-list");
-    const sortable = Sortable.create(sortContainer, {
+    Sortable.create(sortContainer, {
         handle: ".sortable-handle",
         onUpdate: (event) => {
             const draggedElement = inputFiles[event.oldDraggableIndex];
@@ -103,7 +104,7 @@ function initSortableJs() {
  * Input processing and input preview
  */
 
-let originalInputFiles: string[] = [];
+const originalInputFiles: string[] = [];
 let inputFiles: string[] = [];
 ipcRenderer.on("inputFiles", async (_event, data) => await addNewInputs(data as string[]));
 

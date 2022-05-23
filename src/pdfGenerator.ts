@@ -122,7 +122,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
                     `-compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`;
 
                 await exec(magickCommand);
-            } catch (e: any) {
+            } catch (e: unknown) {
                 console.error(e);
             }
 
