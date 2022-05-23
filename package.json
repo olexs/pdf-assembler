@@ -82,7 +82,7 @@
     "@typescript-eslint/parser": "5.17.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.2",
     "css-loader": "6.7.1",
-    "electron": "18.2.4",
+    "electron": "18.3.0",
     "eslint": "8.16.0",
     "eslint-plugin-import": "2.25.4",
     "fork-ts-checker-webpack-plugin": "6.5.2",
