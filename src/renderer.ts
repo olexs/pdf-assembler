@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
-import tempy from 'tempy';
+import {temporaryFile} from 'tempy';
 const exec = util.promisify(child.exec);
 import { initialize, translate, translateHtml } from './i18n';
 import { sortByPreprocessedFilename } from './renderer/sort';
@@ -133,7 +133,7 @@ async function processInputFiles(newInputFiles: string[]) {
 
 async function generateInputThumbnail(file: string, index: number, totalImages: number): Promise<string> {
 
-    const tempFile = tempy.file({extension: "jpg"});
+    const tempFile = temporaryFile({extension: "jpg"});
 
     await exec(`magick convert "${file}" -resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`);
 
