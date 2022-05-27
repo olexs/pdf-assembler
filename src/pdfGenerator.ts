@@ -1,7 +1,7 @@
 import pdfkit from "pdfkit";
 import { imageSize } from "image-size";
 import BlobStream from "blob-stream";
-import tempy from 'tempy';
+import {temporaryFile} from 'tempy';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
@@ -112,7 +112,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
         let processedImageFile: string;
         if (optimizeForFax) {
-            const tempFile = tempy.file({ extension: "jpg" });
+            const tempFile = temporaryFile({ extension: "jpg" });
             console.log("temp file for", inputFile, ":", tempFile);
 
             try {
