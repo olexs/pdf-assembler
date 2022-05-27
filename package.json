@@ -92,7 +92,7 @@
     "transform-loader": "0.2.4",
     "ts-jest": "28.0.3",
     "ts-loader": "9.3.0",
-    "typescript": "4.6.4"
+    "typescript": "4.7.2"
   },
   "dependencies": {
     "blob-stream": "^0.1.3",
