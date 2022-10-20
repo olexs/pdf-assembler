@@ -1,5 +1,5 @@
 import {sortByPreprocessedFilename} from "./sort";
-import {createNewInput} from "../inputFile";
+import {InputFile} from "../inputFile";
 
 describe('input sort', () => {
 
@@ -29,3 +29,11 @@ describe('input sort', () => {
 
 });
 
+function createNewInput(filename: string): InputFile {
+    return {
+        file: filename,
+        modified: false,
+        sizeData: {width: 0, height: 0},
+        data: {}
+    }
+}
