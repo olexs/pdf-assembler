@@ -9,8 +9,8 @@ on:
 
 jobs:
 
-  prebuild:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,20 +25,6 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
-
-  build-windows:
-    runs-on: windows-latest
-    needs: prebuild
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Setup Node.JS
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.node-version'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
       - name: Package and make Windows installer
         run: npm run make
       - name: Upload installer as artifact
@@ -46,10 +32,10 @@ jobs:
         with:
           name: windows-installer
           path: out/make/squirrel.windows/x64/*.exe
+          retention-days: 3
 
   build-macos:
     runs-on: macos-latest
-    needs: prebuild
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,15 +44,28 @@ jobs:
         with:
           node-version-file: '.node-version'
           cache: 'npm'
+      - name: Install ImageMagick
+        run: |
+          brew update
+          brew install imagemagick
       - name: Install dependencies
         run: npm ci
-      - name: Package and make MacOS installer
+      - name: Lint
+        run: npm run lint
+      - name: Run unit tests
+        run: npm test
+      - name: Package Electron app
+        run: npm run package
+      - name: Run E2E tests
+        run: npm run e2e
+      - name: Make MacOS installer
         run: npm run make
       - name: Upload installer as artifact
         uses: actions/upload-artifact@v3
         with:
           name: macos-installer
           path: out/make/*.dmg
+          retention-days: 3
 
   make-release:
     if: startsWith(github.ref, 'refs/tags/')
