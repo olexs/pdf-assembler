@@ -210,6 +210,7 @@ async function editInput(index: number): Promise<void> {
     let editedState = inputFiles[index].data;
 
     const cropper = new Cropper(img, {
+        checkOrientation: false,
         autoCropArea: 1,
         minContainerWidth: 765,
         minContainerHeight: 500,
