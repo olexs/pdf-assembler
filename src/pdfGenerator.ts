@@ -6,6 +6,7 @@ import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
 import {InputFile} from "./inputFile";
+import {magickApplyCropperJsTransform, magickOptimizeForFax} from "./magickCommands";
 
 const exec = util.promisify(child.exec);
 
@@ -84,7 +85,32 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
         const inputFile = inputFiles.shift();
         console.log(`Processing ${inputFile}`);
 
-        const sizeData = imageSize(inputFile.file);
+        let processedImageFile: string;
+
+        if (optimizeForFax || inputFile.modified) {
+            const tempFile = temporaryFile({extension: "jpg"});
+            console.log("temp file for", inputFile.file, ":", tempFile);
+
+            try {
+                const magickCommand = `magick convert "${inputFile.file}" ` +
+                    (inputFile.modified ? magickApplyCropperJsTransform(inputFile.data) : '') +
+                    `-resize ${magickMaxSize} ` +
+                    (optimizeForFax ? magickOptimizeForFax : '') +
+                    `"${tempFile}"`;
+
+                console.log(magickCommand);
+
+                await exec(magickCommand);
+            } catch (e: unknown) {
+                console.error(e);
+            }
+
+            processedImageFile = tempFile;
+        } else {
+            processedImageFile = inputFile.file;
+        }
+
+        const sizeData = imageSize(processedImageFile);
 
         const isImageRotated = sizeData.orientation
             && (sizeData.orientation == exifOrientationCodes.ROTATE_90
@@ -110,27 +136,6 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
             console.log("Starting next page");
             doc.addPage({size: pageSize, margin: 0, layout: orientation});
             currentYPosition = marginSize;
-        }
-
-        let processedImageFile: string;
-        if (optimizeForFax) {
-            const tempFile = temporaryFile({extension: "jpg"});
-            console.log("temp file for", inputFile.file, ":", tempFile);
-
-            try {
-                const cmdEscapeChar = process.platform === "win32" ? "^" : "\\";
-                const magickCommand = `magick convert "${inputFile.file}" -resize ${magickMaxSize} ` +
-                    `-colorspace gray ${cmdEscapeChar}( +clone -blur 5,5 ${cmdEscapeChar}) ` +
-                    `-compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`;
-
-                await exec(magickCommand);
-            } catch (e: unknown) {
-                console.error(e);
-            }
-
-            processedImageFile = tempFile;
-        } else {
-            processedImageFile = inputFile.file;
         }
 
         const xOffset = imageUsesFullPage ? 0 : marginSize;
@@ -164,7 +169,7 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
                 {fit: imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [requiredWidth, requiredHeight]});
         }
 
-        if (optimizeForFax) { // remove temp image from IM preproccessing
+        if (optimizeForFax || inputFile.modified) { // remove temp image from IM preproccessing
             await fs.promises.rm(processedImageFile);
         }
 

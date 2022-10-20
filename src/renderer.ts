@@ -17,6 +17,7 @@ import {sortByPreprocessedFilename} from './renderer/sort';
 import Sortable from 'sortablejs';
 import {InputFile} from "./inputFile";
 import Cropper from 'cropperjs';
+import {magickApplyCropperJsTransform} from "./magickCommands";
 
 const exec = util.promisify(child.exec);
 
@@ -140,15 +141,8 @@ async function generateInputThumbnail(file: InputFile, index: number, totalImage
 
     const tempFile = temporaryFile({extension: "jpg"});
 
-    const d = file.data;
     const magickCommand = `magick convert "${file.file}" `
-
-        // apply CropperJS transformations
-        + `-rotate ${d.rotate} `
-        + `-scale '${d.scaleX*100}%x${d.scaleY*100}%' `
-        + (d.width && d.height ? `-crop ${d.width}x${d.height}${d.x >= 0 ? '+' : ''}${d.x}${d.y >= 0 ? '+' : ''}${d.y} ` : '')
-
-        // finalize target size and layout
+        + magickApplyCropperJsTransform(file.data)
         + `-resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`;
 
     await exec(magickCommand);
@@ -229,6 +223,7 @@ async function editInput(index: number): Promise<void> {
     document.getElementById('btn-input-edit-close').onclick = () => { cropper.destroy(); modal.hide(); }
     document.getElementById('btn-input-edit-confirm').onclick = async () => {
         inputFiles[index].data = editedState;
+        inputFiles[index].modified = true;
         cropper.destroy();
         modal.hide();
         await processInputFiles(inputFiles);
@@ -236,7 +231,7 @@ async function editInput(index: number): Promise<void> {
 
     document.getElementById('btn-input-edit-reset').onclick = () => { cropper.reset(); }
     document.getElementById('btn-input-edit-rotate-cw').onclick = () => { cropper.rotate(90); }
-    document.getElementById('btn-input-edit-rotate-ccw').onclick = () => { cropper.rotate(-90); }
+    document.getElementById('btn-input-edit-rotate-ccw').onclick = () => { cropper.rotate(-90);  }
     document.getElementById('btn-input-edit-zoom-in').onclick = () => { cropper.zoom(0.1); }
     document.getElementById('btn-input-edit-zoom-out').onclick = () => { cropper.zoom(-0.1); }
 }
