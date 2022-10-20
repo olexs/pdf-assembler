@@ -4,12 +4,13 @@ import path from 'path';
 import {ipcRenderer} from 'electron';
 import * as child from 'child_process';
 import util from 'util';
+import {createNewInput, InputFile} from "./inputFile";
 
 const exec = util.promisify(child.exec);
 
-async function preprocessInputFiles(inputFiles: string[]): Promise<string[]> {
+async function preprocessInputFiles(inputFiles: string[]): Promise<InputFile[]> {
     const processedFiles = await Promise.all(inputFiles.map(processFile));
-    return processedFiles.flat();
+    return processedFiles.flat().map(createNewInput);
 }
 
 const supportedExtensions = [

@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'bootstrap';
+import {Modal} from 'bootstrap';
 import {ipcRenderer} from 'electron';
 import {generatePdf, GeneratorOptions} from './pdfGenerator';
 import {preprocessInputFiles} from './preprocessor';
@@ -9,12 +9,14 @@ import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
 import {temporaryFile} from 'tempy';
-
-const exec = util.promisify(child.exec);
 import {initialize, translate, translateHtml} from './i18n';
 import {sortByPreprocessedFilename} from './renderer/sort';
+
 // eslint-disable-next-line import/no-named-as-default
 import Sortable from 'sortablejs';
+import {InputFile} from "./inputFile";
+
+const exec = util.promisify(child.exec);
 
 /*
  * Helpers
@@ -106,7 +108,7 @@ function initSortableJs() {
  */
 
 const originalInputFiles: string[] = [];
-let inputFiles: string[] = [];
+let inputFiles: InputFile[] = [];
 ipcRenderer.on("inputFiles", async (_event, data) => await addNewInputs(data as string[]));
 
 async function addNewInputs(newInputs: string[]) {
@@ -117,7 +119,7 @@ async function addNewInputs(newInputs: string[]) {
     await processInputFiles(inputFiles);
 }
 
-async function processInputFiles(newInputFiles: string[]) {
+async function processInputFiles(newInputFiles: InputFile[]) {
     if (newInputFiles.length === 0) {
         console.error("Renderer: No input files provided!");
     } else {
@@ -129,20 +131,20 @@ async function processInputFiles(newInputFiles: string[]) {
     inputFiles = newInputFiles;
 
     registerThumbnailCallbacks();
-    if (inputFiles.length > 0) generateTempPDF();
+    if (inputFiles.length > 0) await generateTempPDF();
 }
 
-async function generateInputThumbnail(file: string, index: number, totalImages: number): Promise<string> {
+async function generateInputThumbnail(file: InputFile, index: number, totalImages: number): Promise<string> {
 
     const tempFile = temporaryFile({extension: "jpg"});
 
-    await exec(`magick convert "${file}" -resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`);
+    await exec(`magick convert "${file.file}" -resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`);
 
     const imageThumbnail = await fs.promises.readFile(tempFile);
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
     await fs.promises.rm(tempFile);
 
-    const filename = path.basename(file, path.extname(file));
+    const filename = path.basename(file.file, path.extname(file.file));
 
     let page = "";
     const pageMatch = filename.match(/\.pdf-[0-9]+$/);
@@ -156,6 +158,13 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
             <div class="mt-2">${page}</div>
         </div>
         <div class="d-flex flex-row align-items-center">
+            <button type="button" 
+                    title="${translate('button_edit')}"
+                    id="btn-input-edit-${index}" 
+                    class="btn btn-primary float-end btn-sm ms-1"
+                    ${totalImages <= 1 ? 'disabled' : ''}>
+                <i class="bi-sliders"></i>
+            </button>
             <button type="button" 
                     title="${translate('button_delete')}"
                     id="btn-input-delete-${index}" 
@@ -171,21 +180,27 @@ async function generateInputThumbnail(file: string, index: number, totalImages: 
 function registerThumbnailCallbacks() {
     for (let index = 0; index < inputFiles.length; index++) {
         document.getElementById(`btn-input-delete-${index}`).onclick = () => deleteInput(index);
+        document.getElementById(`btn-input-edit-${index}`).onclick = () => editInput(index);
     }
 }
 
-function deleteInput(index: number): void {
-    const filename = path.basename(inputFiles[index], path.extname(inputFiles[index]));
+async function deleteInput(index: number): Promise<void> {
+    const filename = path.basename(inputFiles[index].file, path.extname(inputFiles[index].file));
     if (!confirm(translate("confirm_delete", {filename}))) return;
 
     inputFiles.splice(index, 1);
 
-    processInputFiles(inputFiles);
+    await processInputFiles(inputFiles);
 }
 
-function sortInputs(): void {
+function editInput(index: number): void {
+    const modal = new Modal('#input-edit-modal');
+    modal.show();
+}
+
+async function sortInputs(): Promise<void> {
     inputFiles = sortByPreprocessedFilename(inputFiles);
-    processInputFiles(inputFiles);
+    await processInputFiles(inputFiles);
 }
 
 function addInput(): void {

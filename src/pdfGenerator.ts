@@ -5,6 +5,7 @@ import {temporaryFile} from 'tempy';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
+import {InputFile} from "./inputFile";
 
 const exec = util.promisify(child.exec);
 
@@ -42,7 +43,7 @@ const exifOrientationCodes = {
     ROTATE_270: 8
 }
 
-async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
+async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
     //  Setup
     // -------
@@ -83,7 +84,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
         const inputFile = inputFiles.shift();
         console.log(`Processing ${inputFile}`);
 
-        const sizeData = imageSize(inputFile);
+        const sizeData = imageSize(inputFile.file);
 
         const isImageRotated = sizeData.orientation
             && (sizeData.orientation == exifOrientationCodes.ROTATE_90
@@ -114,11 +115,11 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
         let processedImageFile: string;
         if (optimizeForFax) {
             const tempFile = temporaryFile({extension: "jpg"});
-            console.log("temp file for", inputFile, ":", tempFile);
+            console.log("temp file for", inputFile.file, ":", tempFile);
 
             try {
                 const cmdEscapeChar = process.platform === "win32" ? "^" : "\\";
-                const magickCommand = `magick convert "${inputFile}" -resize ${magickMaxSize} ` +
+                const magickCommand = `magick convert "${inputFile.file}" -resize ${magickMaxSize} ` +
                     `-colorspace gray ${cmdEscapeChar}( +clone -blur 5,5 ${cmdEscapeChar}) ` +
                     `-compose Divide_Src -composite -normalize -threshold 80%% "${tempFile}"`;
 
@@ -129,7 +130,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
             processedImageFile = tempFile;
         } else {
-            processedImageFile = inputFile;
+            processedImageFile = inputFile.file;
         }
 
         const xOffset = imageUsesFullPage ? 0 : marginSize;
