@@ -140,7 +140,18 @@ async function generateInputThumbnail(file: InputFile, index: number, totalImage
 
     const tempFile = temporaryFile({extension: "jpg"});
 
-    await exec(`magick convert "${file.file}" -resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`);
+    const d = file.data;
+    const magickCommand = `magick convert "${file.file}" `
+
+        // apply CropperJS transformations
+        + `-rotate ${d.rotate} `
+        + `-scale '${d.scaleX*100}%x${d.scaleY*100}%' `
+        + (d.width && d.height ? `-crop ${d.width}x${d.height}${d.x >= 0 ? '+' : ''}${d.x}${d.y >= 0 ? '+' : ''}${d.y} ` : '')
+
+        // finalize target size and layout
+        + `-resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`;
+
+    await exec(magickCommand);
 
     const imageThumbnail = await fs.promises.readFile(tempFile);
     const imageThumbnailSrc = "data:image/jpeg;base64," + imageThumbnail.toString("base64");
@@ -195,7 +206,7 @@ async function deleteInput(index: number): Promise<void> {
     await processInputFiles(inputFiles);
 }
 
-function editInput(index: number): void {
+async function editInput(index: number): Promise<void> {
     const modal = new Modal('#input-edit-modal');
     modal.show();
 
@@ -216,10 +227,11 @@ function editInput(index: number): void {
 
     document.getElementById('btn-input-edit-cancel').onclick = () => { cropper.destroy(); modal.hide(); }
     document.getElementById('btn-input-edit-close').onclick = () => { cropper.destroy(); modal.hide(); }
-    document.getElementById('btn-input-edit-confirm').onclick = () => {
+    document.getElementById('btn-input-edit-confirm').onclick = async () => {
         inputFiles[index].data = editedState;
         cropper.destroy();
         modal.hide();
+        await processInputFiles(inputFiles);
     }
 
     document.getElementById('btn-input-edit-reset').onclick = () => { cropper.reset(); }
