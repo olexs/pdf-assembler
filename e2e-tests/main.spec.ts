@@ -44,12 +44,32 @@ test.afterEach(async () => {
     await electronApp.close();
 });
 
-test('renders the main layout', async () => {
-    const page = await launchApp('e2e-tests/input/Placeholder.png');
-    await page.waitForSelector('#preview-iframe');
+test('renders a single input preview after launch', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png');
 
-    await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+    await page.waitForSelector('#input-list .list-group-item');
 
-    await expect(page.locator('#preview-iframe')).toHaveScreenshot();
+    await expect(page.locator('#input-list')).toHaveScreenshot();
 });
 
+test('renders multiple input previews after launch', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png', 'e2e-tests/inputs/ElectronLogo.png');
+
+    await page.waitForSelector('#input-list .list-group-item');
+
+    await expect(page.locator('#input-list')).toHaveScreenshot();
+});
+
+test('allows to rotate and crop the image and renders the preview after changes', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png');
+    await page.waitForSelector('#input-list .list-group-item');
+
+    await page.locator('#btn-input-edit-0').click();
+
+    await page.locator('#btn-input-edit-rotate-ccw').click();
+    await page.locator('#btn-input-edit-zoom-in').click();
+    await page.locator('#btn-input-edit-zoom-in').click();
+    await page.locator('#btn-input-edit-confirm').click();
+
+    await expect(page.locator('#input-list')).toHaveScreenshot();
+});
