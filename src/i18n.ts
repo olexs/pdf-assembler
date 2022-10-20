@@ -35,7 +35,7 @@ async function initialize(language = "en"): Promise<void> {
                     "confirm_delete": "Delete {{filename}} from the list of inputs?",
                     "page_size": "Page layout:",
                     "orientation_portrait": "Portrait",
-                    "orientation_landscape": "Landscape",             
+                    "orientation_landscape": "Landscape",
                 }
             },
             de: {
@@ -92,4 +92,4 @@ function translate(key: string, options?: unknown): string {
     return t(key, options as TOptions<object>);
 }
 
-export { initialize, translateHtml, translate };
+export {initialize, translateHtml, translate};

@@ -1,10 +1,11 @@
 import pdfkit from "pdfkit";
-import { imageSize } from "image-size";
+import {imageSize} from "image-size";
 import BlobStream from "blob-stream";
 import {temporaryFile} from 'tempy';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
+
 const exec = util.promisify(child.exec);
 
 interface GeneratorOptions {
@@ -45,7 +46,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     // -------
     //  Setup
     // -------
-    const { pageSize, orientation, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax } =
+    const {pageSize, orientation, marginSize, spacingBetweenElements, omitFullPageMargin, optimizeForFax} =
         options ? Object.assign(defaultOptions, options) as GeneratorOptions : defaultOptions;
 
     const widthIndex = orientation === "portrait" ? 0 : 1;
@@ -71,7 +72,7 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     // -------------------
     // Generate output PDF
     // -------------------
-    const doc = new pdfkit({ autoFirstPage: false, size: pageSize, layout: orientation });
+    const doc = new pdfkit({autoFirstPage: false, size: pageSize, layout: orientation});
     const stream = doc.pipe(BlobStream());
 
     let currentYPosition = availableHeightPerPage;
@@ -84,8 +85,8 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
         const sizeData = imageSize(inputFile);
 
-        const isImageRotated = sizeData.orientation 
-            && (sizeData.orientation == exifOrientationCodes.ROTATE_90 
+        const isImageRotated = sizeData.orientation
+            && (sizeData.orientation == exifOrientationCodes.ROTATE_90
                 || sizeData.orientation === exifOrientationCodes.ROTATE_270);
 
         const imageWidth = !isImageRotated ? sizeData.width : sizeData.height;
@@ -106,13 +107,13 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
         const heightAvailableOnCurrentPage = availableHeightPerPage - currentYPosition;
         if (imageUsesFullPage || requiredHeight > heightAvailableOnCurrentPage) {
             console.log("Starting next page");
-            doc.addPage({ size: pageSize, margin: 0, layout: orientation });
+            doc.addPage({size: pageSize, margin: 0, layout: orientation});
             currentYPosition = marginSize;
         }
 
         let processedImageFile: string;
         if (optimizeForFax) {
-            const tempFile = temporaryFile({ extension: "jpg" });
+            const tempFile = temporaryFile({extension: "jpg"});
             console.log("temp file for", inputFile, ":", tempFile);
 
             try {
@@ -139,27 +140,27 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
 
         if (isImageRotated && sizeData.orientation === exifOrientationCodes.ROTATE_90) {
             console.debug("Image rotation is 90° CW, offsets are", [xOffset, yOffset]);
-            doc.rotate(90, { origin: [xOffset, yOffset] });
-            doc.image(processedImageFile, 
-                xOffset, 
-                yOffset - (imageUsesFullPage ? fullPageWidth : requiredWidth), 
-                { fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth] });
-            doc.rotate(-90, { origin: [xOffset, yOffset] });
+            doc.rotate(90, {origin: [xOffset, yOffset]});
+            doc.image(processedImageFile,
+                xOffset,
+                yOffset - (imageUsesFullPage ? fullPageWidth : requiredWidth),
+                {fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth]});
+            doc.rotate(-90, {origin: [xOffset, yOffset]});
         } else if (isImageRotated && sizeData.orientation === exifOrientationCodes.ROTATE_270) {
             // 270° CW
             console.debug("Image rotation is 270° CW, offsets are", [xOffset, yOffset]);
-            doc.rotate(270, { origin: [xOffset, yOffset] });
-            doc.image(processedImageFile, 
-                xOffset - (imageUsesFullPage ? fullPageHeight : requiredHeight), 
-                yOffset, 
-                { fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth] });
-            doc.rotate(-270, { origin: [xOffset, yOffset] });
+            doc.rotate(270, {origin: [xOffset, yOffset]});
+            doc.image(processedImageFile,
+                xOffset - (imageUsesFullPage ? fullPageHeight : requiredHeight),
+                yOffset,
+                {fit: imageUsesFullPage ? [fullPageHeight, fullPageWidth] : [requiredHeight, requiredWidth]});
+            doc.rotate(-270, {origin: [xOffset, yOffset]});
         } else {
             // no or unsupported rotation, place as is
-            doc.image(processedImageFile, 
-                xOffset, 
-                yOffset, 
-                { fit: imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [requiredWidth, requiredHeight] });
+            doc.image(processedImageFile,
+                xOffset,
+                yOffset,
+                {fit: imageUsesFullPage ? [fullPageWidth, fullPageHeight] : [requiredWidth, requiredHeight]});
         }
 
         if (optimizeForFax) { // remove temp image from IM preproccessing
@@ -190,4 +191,4 @@ async function generatePdf(inputFiles: string[], options: Partial<GeneratorOptio
     return dataUrl;
 }
 
-export { generatePdf, GeneratorOptions };
+export {generatePdf, GeneratorOptions};

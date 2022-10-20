@@ -1,9 +1,10 @@
 import {temporaryDirectory} from 'tempy';
 import fs from 'fs';
 import path from 'path';
-import { ipcRenderer } from 'electron';
+import {ipcRenderer} from 'electron';
 import * as child from 'child_process';
 import util from 'util';
+
 const exec = util.promisify(child.exec);
 
 async function preprocessInputFiles(inputFiles: string[]): Promise<string[]> {
@@ -13,7 +14,7 @@ async function preprocessInputFiles(inputFiles: string[]): Promise<string[]> {
 
 const supportedExtensions = [
     ".jpg", ".jpeg",
-    ".png", 
+    ".png",
     ".bmp",
     ".pdf",
     ".tiff"
@@ -44,7 +45,7 @@ async function deconstructPdf(inputFile: string): Promise<string[]> {
     ipcRenderer.send("addedTempDir", tempDir);
     console.log("Deconstructing", inputFilename, "to", tempDir);
     const magickTargetFilename = tempDir + path.sep + inputFilename + ".jpg";
-    
+
     await exec(`magick convert -density 216 "${inputFile}" "${magickTargetFilename}"`);
 
     const files = await fs.promises.readdir(tempDir);
@@ -52,4 +53,4 @@ async function deconstructPdf(inputFile: string): Promise<string[]> {
     return files.map(file => tempDir + path.sep + file);
 }
 
-export { preprocessInputFiles };
+export {preprocessInputFiles};

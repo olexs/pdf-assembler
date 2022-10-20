@@ -1,4 +1,4 @@
-import { sortByPreprocessedFilename } from "./sort";
+import {sortByPreprocessedFilename} from "./sort";
 
 describe('input sort', () => {
 
