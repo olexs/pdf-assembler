@@ -63,7 +63,7 @@ const createWindow = async (): Promise<void> => {
         // patch CSP to allow blob: everywhere where data: is allowed, to allow the iframe with blobSrc PDF to render -.-
         const responseHeaders = details.responseHeaders;
         if (responseHeaders["Content-Security-Policy"]) {
-            responseHeaders["Content-Security-Policy"][0] = responseHeaders["Content-Security-Policy"][0].replace(/data:/, "data: blob:");
+            responseHeaders["Content-Security-Policy"][0] = responseHeaders["Content-Security-Policy"][0].replace(/data:/, "data: blob: file:");
         }
 
         callback({responseHeaders});

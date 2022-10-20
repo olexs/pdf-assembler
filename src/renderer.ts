@@ -1,5 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'cropperjs/dist/cropper.css';
 import {Modal} from 'bootstrap';
 import {ipcRenderer} from 'electron';
 import {generatePdf, GeneratorOptions} from './pdfGenerator';
@@ -15,6 +16,7 @@ import {sortByPreprocessedFilename} from './renderer/sort';
 // eslint-disable-next-line import/no-named-as-default
 import Sortable from 'sortablejs';
 import {InputFile} from "./inputFile";
+import Cropper from 'cropperjs';
 
 const exec = util.promisify(child.exec);
 
@@ -196,6 +198,35 @@ async function deleteInput(index: number): Promise<void> {
 function editInput(index: number): void {
     const modal = new Modal('#input-edit-modal');
     modal.show();
+
+    const img = document.getElementById('input-edit-cropper') as HTMLImageElement;
+    img.src = "file://" + inputFiles[index].file;
+
+    let editedState = inputFiles[index].data;
+
+    const cropper = new Cropper(img, {
+        autoCropArea: 1,
+        minContainerWidth: 765,
+        minContainerHeight: 500,
+        data: inputFiles[index].data,
+        crop(event: Cropper.CropEvent<HTMLImageElement>) {
+            editedState = event.detail;
+        }
+    });
+
+    document.getElementById('btn-input-edit-cancel').onclick = () => { cropper.destroy(); modal.hide(); }
+    document.getElementById('btn-input-edit-close').onclick = () => { cropper.destroy(); modal.hide(); }
+    document.getElementById('btn-input-edit-confirm').onclick = () => {
+        inputFiles[index].data = editedState;
+        cropper.destroy();
+        modal.hide();
+    }
+
+    document.getElementById('btn-input-edit-reset').onclick = () => { cropper.reset(); }
+    document.getElementById('btn-input-edit-rotate-cw').onclick = () => { cropper.rotate(90); }
+    document.getElementById('btn-input-edit-rotate-ccw').onclick = () => { cropper.rotate(-90); }
+    document.getElementById('btn-input-edit-zoom-in').onclick = () => { cropper.zoom(0.1); }
+    document.getElementById('btn-input-edit-zoom-out').onclick = () => { cropper.zoom(-0.1); }
 }
 
 async function sortInputs(): Promise<void> {

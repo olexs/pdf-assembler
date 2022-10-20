@@ -173,19 +173,46 @@
   </div>
 </div>
 
-<div class="modal fade" id="input-edit-modal">
-  <div class="modal-dialog">
+<div class="modal fade" id="input-edit-modal" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="input-edit-modal-label">Eingabe bearbeiten</h1>
-        <button type="button" class="btn-close"></button>
+        <button type="button" id="btn-input-edit-close" class="btn-close"></button>
       </div>
       <div class="modal-body">
-        bla bla
+        <img id="input-edit-cropper" style="display: block; max-width: 100%;" src="" alt="">
+        <div class="text-center mt-2">
+          <button type="button"
+                 id="btn-input-edit-rotate-ccw"
+                 class="btn btn-primary ma-1">
+            <i class="bi-arrow-counterclockwise"></i>
+          </button>
+          <button type="button"
+                  id="btn-input-edit-rotate-cw"
+                  class="btn btn-primary ma-1">
+            <i class="bi-arrow-clockwise"></i>
+          </button>
+          <button type="button"
+                  id="btn-input-edit-zoom-in"
+                  class="btn btn-primary ma-1">
+            <i class="bi-zoom-in"></i>
+          </button>
+          <button type="button"
+                  id="btn-input-edit-zoom-out"
+                  class="btn btn-primary ma-1">
+            <i class="bi-zoom-out"></i>
+          </button>
+          <button type="button"
+                  id="btn-input-edit-reset"
+                  class="btn btn-secondary ma-1">
+            <i class="bi-aspect-ratio"></i>
+          </button>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary">Abbrechen</button>
-        <button type="button" class="btn btn-primary">Übernehmen</button>
+        <button type="button" class="btn btn-secondary" id="btn-input-edit-cancel">Abbrechen</button>
+        <button type="button" class="btn btn-primary" id="btn-input-edit-confirm">Übernehmen</button>
       </div>
     </div>
   </div>
