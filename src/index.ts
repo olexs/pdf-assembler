@@ -15,27 +15,33 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 const tempDirs: string[] = [];
 
+const env = process.env.NODE_ENV || 'development';
+
+const appSize = {
+    width: env === 'production' ? 1200 : 2200,
+    height: 800,
+}
+
 const createWindow = async (): Promise<void> => {
     await initialize(app.getLocale());
 
     const mainWindow = new BrowserWindow({
-        height: 800,
-        width: 1200,
+        height: appSize.height,
+        width: appSize.width,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
             webSecurity: false,
-        }
+        },
+        titleBarStyle: "hidden"
     });
 
-    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-    const env = process.env.NODE_ENV || 'development';
     if (env !== 'production')
         mainWindow.webContents.openDevTools();
 
     mainWindow.removeMenu();
-    mainWindow.setMinimumSize(1200, 800);
+    mainWindow.setMinimumSize(appSize.width, appSize.height);
+    mainWindow.setWindowButtonVisibility(true);
 
     mainWindow.webContents.on("did-finish-load", () => {
         mainWindow.webContents.send("initI18n", app.getLocale());
@@ -62,6 +68,8 @@ const createWindow = async (): Promise<void> => {
 
         callback({responseHeaders});
     });
+
+    await mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 };
 
 async function showSaveDialog(window: BrowserWindow, inputFile: string) {
