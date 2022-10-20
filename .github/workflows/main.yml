@@ -36,9 +36,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows-e2e-test-results
-          path: |
-            test-results/
-            e2e-tests/main.spec.ts-snapshots/
+          path: test-results/
           retention-days: 3
       - name: Make Windows installer
         run: npm run make
@@ -76,9 +74,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos-e2e-test-results
-          path: |
-            test-results/
-            e2e-tests/main.spec.ts-snapshots/
+          path: test-results/
           retention-days: 3
       - name: Make MacOS installer
         run: npm run make
