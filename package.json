@@ -10,7 +10,7 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "test": "jest",
+    "test": "jest src/**/*.spec.ts",
     "e2e": "playwright test"
   },
   "keywords": [],
