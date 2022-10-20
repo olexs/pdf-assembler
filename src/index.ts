@@ -18,7 +18,7 @@ const tempDirs: string[] = [];
 const env = process.env.NODE_ENV || 'development';
 
 const appSize = {
-    width: env === 'production' ? 1200 : 2200,
+    width: 1200, //  env === 'production' ? 1200 : 2200,
     height: 800,
 }
 
@@ -33,7 +33,8 @@ const createWindow = async (): Promise<void> => {
             contextIsolation: false,
             webSecurity: false,
         },
-        titleBarStyle: "hidden"
+        titleBarStyle: "hidden",
+        titleBarOverlay: true
     });
 
     if (env !== 'production')
@@ -41,8 +42,7 @@ const createWindow = async (): Promise<void> => {
 
     mainWindow.removeMenu();
     mainWindow.setMinimumSize(appSize.width, appSize.height);
-    mainWindow.setWindowButtonVisibility(true);
-
+    
     mainWindow.webContents.on("did-finish-load", () => {
         mainWindow.webContents.send("initI18n", app.getLocale());
 
