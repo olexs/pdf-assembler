@@ -36,6 +36,14 @@ async function initialize(language = "en"): Promise<void> {
                     "page_size": "Page layout:",
                     "orientation_portrait": "Portrait",
                     "orientation_landscape": "Landscape",
+                    "header_edit_input": "Edit input",
+                    "button_apply": "Apply",
+                    "button_cancel": "Cancel",
+                    "button_rotate_cw": "Rotate clockwise",
+                    "button_rotate_ccw": "Rotate counter-clockwise",
+                    "button_zoom_in": "Zoom in",
+                    "button_zoom_out": "Zoom out",
+                    "button_reset": "Restore original",
                 }
             },
             de: {
@@ -68,6 +76,14 @@ async function initialize(language = "en"): Promise<void> {
                     "page_size": "Seitengröße:",
                     "orientation_portrait": "Hochformat",
                     "orientation_landscape": "Querformat",
+                    "header_edit_input": "Eingabe bearbeiten",
+                    "button_apply": "Übernehmen",
+                    "button_cancel": "Abbrechen",
+                    "button_rotate_cw": "Im Uhrzeigersinn drehen",
+                    "button_rotate_ccw": "Gegen Uhrzeigersinn drehen",
+                    "button_zoom_in": "Vergrößern",
+                    "button_zoom_out": "Verkleinern",
+                    "button_reset": "Original wiederherstellen",
                 }
             }
         }
