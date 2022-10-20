@@ -142,7 +142,7 @@ async function generateInputThumbnail(file: InputFile, index: number, totalImage
     const tempFile = temporaryFile({extension: "jpg"});
 
     const magickCommand = `magick convert "${file.file}" `
-        + magickApplyCropperJsTransform(file.data)
+        + magickApplyCropperJsTransform(file.data, file.sizeData)
         + `-resize 64x64 -gravity Center -extent 64x64 "${tempFile}"`;
 
     await exec(magickCommand);
@@ -168,8 +168,7 @@ async function generateInputThumbnail(file: InputFile, index: number, totalImage
             <button type="button" 
                     title="${translate('button_edit')}"
                     id="btn-input-edit-${index}" 
-                    class="btn btn-primary float-end btn-sm ms-1"
-                    ${totalImages <= 1 ? 'disabled' : ''}>
+                    class="btn btn-primary float-end btn-sm ms-1">
                 <i class="bi-sliders"></i>
             </button>
             <button type="button" 

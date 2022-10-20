@@ -7,6 +7,7 @@ import * as child from 'child_process';
 import util from 'util';
 import {InputFile} from "./inputFile";
 import {magickApplyCropperJsTransform, magickOptimizeForFax} from "./magickCommands";
+import {exifOrientationCodes} from "./exifOrientationCodes";
 
 const exec = util.promisify(child.exec);
 
@@ -37,12 +38,6 @@ const pageSizesPortrait = {
 }
 
 const maximumAspectRatioDeviationFromFullPage = 0.05;
-
-// https://exiftool.org/TagNames/EXIF.html, 0x0112 Orientation
-const exifOrientationCodes = {
-    ROTATE_90: 6,
-    ROTATE_270: 8
-}
 
 async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOptions>, updateProgress: (currentIndex: number) => void): Promise<string> {
     // -------
@@ -93,7 +88,7 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
 
             try {
                 const magickCommand = `magick convert "${inputFile.file}" ` +
-                    (inputFile.modified ? magickApplyCropperJsTransform(inputFile.data) : '') +
+                    (inputFile.modified ? magickApplyCropperJsTransform(inputFile.data, inputFile.sizeData) : '') +
                     `-resize ${magickMaxSize} ` +
                     (optimizeForFax ? magickOptimizeForFax : '') +
                     `"${tempFile}"`;
