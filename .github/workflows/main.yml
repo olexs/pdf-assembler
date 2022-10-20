@@ -79,7 +79,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: | 
-          build-windows/*.exe
-          build-macos/*.dmg
+          windows-installer/*.exe
+          macos-installer/*.dmg
         generate_release_notes: true
         draft: true
