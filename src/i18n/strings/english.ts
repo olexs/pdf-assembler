@@ -39,4 +39,5 @@ export const english = {
     "button_flip_horizontal": "Mirror horizontally",
     "button_flip_vertical": "Mirror vertically",
     "add_input_to_show_preview": "Add inputs to generate a preview",
+    "input-drop-here": "Drop here to add as input",
 };

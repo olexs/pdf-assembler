@@ -18,6 +18,7 @@ import Sortable from 'sortablejs';
 import {InputFile} from "./inputFile";
 import Cropper from 'cropperjs';
 import {magickApplyCropperJsTransform} from "./magickCommands";
+import {registerDropHandlers} from "./dropFileHandling";
 
 const exec = util.promisify(child.exec);
 
@@ -45,6 +46,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     loadSavedOptions();
     registerStaticCallbacks();
     initSortableJs();
+    registerDropHandlers(addNewInputs);
 });
 
 function loadSavedOptions(): void {

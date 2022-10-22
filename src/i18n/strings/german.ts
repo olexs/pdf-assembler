@@ -39,4 +39,5 @@ export const german = {
     "button_flip_horizontal": "Horizontal spiegeln",
     "button_flip_vertical": "Vertikal spiegeln",
     "add_input_to_show_preview": "Eingaben hinzufügen, um Vorschau anzuzeigen",
+    "input-drop-here": "Hier ablegen, um Eingabe hinzuzufügen",
 };
