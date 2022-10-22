@@ -232,6 +232,8 @@ async function editInput(index: number): Promise<void> {
     document.getElementById('btn-input-edit-reset').onclick = () => { cropper.reset(); }
     document.getElementById('btn-input-edit-rotate-cw').onclick = () => { cropper.rotate(90); }
     document.getElementById('btn-input-edit-rotate-ccw').onclick = () => { cropper.rotate(-90);  }
+    document.getElementById('btn-input-edit-flip-horizontal').onclick = () => { cropper.scaleX(-editedState.scaleX); }
+    document.getElementById('btn-input-edit-flip-vertical').onclick = () => { cropper.scaleY(-editedState.scaleY); }
     document.getElementById('btn-input-edit-zoom-in').onclick = () => { cropper.zoom(0.1); }
     document.getElementById('btn-input-edit-zoom-out').onclick = () => { cropper.zoom(-0.1); }
 }

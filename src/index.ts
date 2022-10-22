@@ -18,7 +18,7 @@ const tempDirs: string[] = [];
 const env = process.env.NODE_ENV || 'development';
 
 const appSize = {
-    width: 1200, //  env === 'production' ? 1200 : 2200,
+    width: 1200,
     height: 800,
 }
 
@@ -38,7 +38,7 @@ const createWindow = async (): Promise<void> => {
     });
 
     if (env !== 'production')
-        mainWindow.webContents.openDevTools();
+        mainWindow.webContents.openDevTools({mode: "undocked"});
 
     mainWindow.removeMenu();
     mainWindow.setMinimumSize(appSize.width, appSize.height);

@@ -15,7 +15,8 @@ export const magickApplyCropperJsTransform = (raw: Partial<Cropper.Data>, sizeDa
 
     return (exifRotated ? `-rotate ${exifRotation} ` : '')
         + `-rotate ${raw.rotate} `
-        + `-scale ${raw.scaleX * 100}%x${raw.scaleY * 100}% `
+        + (raw.scaleY < 0 ? '-flip ' : '') + (raw.scaleX < 0 ? '-flop ' : '')
+        + `-scale ${Math.abs(raw.scaleX) * 100}%x${Math.abs(raw.scaleY) * 100}% `
         + (raw.width && raw.height
             ? `-crop ${raw.width}x${raw.height}${raw.x >= 0 ? '+' : ''}${raw.x}${raw.y >= 0 ? '+' : ''}${raw.y} `
             : '')

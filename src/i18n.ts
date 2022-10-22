@@ -44,6 +44,8 @@ async function initialize(language = "en"): Promise<void> {
                     "button_zoom_in": "Zoom in",
                     "button_zoom_out": "Zoom out",
                     "button_reset": "Restore original",
+                    "button_flip_horizontal": "Mirror horizontally",
+                    "button_flip_vertical": "Mirror vertically",
                 }
             },
             de: {
@@ -84,6 +86,8 @@ async function initialize(language = "en"): Promise<void> {
                     "button_zoom_in": "Vergrößern",
                     "button_zoom_out": "Verkleinern",
                     "button_reset": "Original wiederherstellen",
+                    "button_flip_horizontal": "Horizontal spiegeln",
+                    "button_flip_vertical": "Vertikal spiegeln",
                 }
             }
         }
