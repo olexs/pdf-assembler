@@ -124,8 +124,15 @@ async function addNewInputs(newInputs: string[]) {
 
 async function processInputFiles(newInputFiles: InputFile[]) {
     if (newInputFiles.length === 0) {
-        console.error("Renderer: No input files provided!");
+        console.log("Renderer: No input files provided!");
     } else {
+        if (document.getElementById("inputs-add-inputs")) {
+            document.getElementById("inputs-add-inputs").style.display = "none";
+        }
+        if (document.getElementById("inputs-loading")) {
+            document.getElementById("inputs-loading").style.display = "block";
+        }
+
         console.log(`Renderer: Processing ${newInputFiles.length} input files`);
         const previews = await Promise.all(newInputFiles.map(async (file, index) => await generateInputThumbnail(file, index, newInputFiles.length)));
         document.getElementById("input-list").innerHTML = previews.join("");
@@ -244,7 +251,8 @@ async function sortInputs(): Promise<void> {
 }
 
 function addInput(): void {
-    ipcRenderer.send("addDialogTriggered", originalInputFiles[0]);
+    ipcRenderer.send("addDialogTriggered",
+        originalInputFiles.length ? originalInputFiles[originalInputFiles.length - 1] : '');
 }
 
 ipcRenderer.on("addDialogConfirmed", async (_event, data) => await addNewInputs(data as string[]));
@@ -257,6 +265,7 @@ let previousBlobUrl = "";
 
 async function generateTempPDF() {
     document.getElementById("preview-iframe").style.display = "none";
+    document.getElementById("preview-no-input").style.display = "none";
     document.getElementById("preview-spinner").style.display = "block";
     document.getElementById("progressbar").style.width = `0%`;
 

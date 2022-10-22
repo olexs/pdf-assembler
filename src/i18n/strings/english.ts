@@ -38,4 +38,5 @@ export const english = {
     "button_reset": "Restore original",
     "button_flip_horizontal": "Mirror horizontally",
     "button_flip_vertical": "Mirror vertically",
+    "add_input_to_show_preview": "Add inputs to generate a preview",
 };

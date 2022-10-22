@@ -38,4 +38,5 @@ export const german = {
     "button_reset": "Original wiederherstellen",
     "button_flip_horizontal": "Horizontal spiegeln",
     "button_flip_vertical": "Vertikal spiegeln",
+    "add_input_to_show_preview": "Eingaben hinzufügen, um Vorschau anzuzeigen",
 };

@@ -30,7 +30,14 @@
                  overflow-x: hidden;"
           class="mb-2 list-group flex-grow-1 flex-shrink-1"
           id="input-list">
-        <div class="spinner-border text-secondary" style="width: 100px; height: 100px; margin: auto;">
+        <div id="inputs-add-inputs"
+             class="text-secondary"
+             style="margin: auto;">
+          Add some inputs to start
+        </div>
+        <div id="inputs-loading"
+             class="spinner-border text-secondary"
+             style="width: 100px; height: 100px; margin: auto; display: none;">
           <span class="visually-hidden" data-i18n="loading">Loading...</span>
         </div>
       </ul>
@@ -41,7 +48,7 @@
           <span data-i18n="button_sort">Sortieren</span>
         </button>
         &nbsp;
-        <button class="flex-fill btn btn-secondary" id="btn-input-add">
+        <button class="flex-fill btn btn-primary" id="btn-input-add">
           <i class="bi bi-file-earmark-plus"></i>
           <span data-i18n="button_add">Hinzufügen...</span>
         </button>
@@ -130,9 +137,10 @@
 
       <div class="mb-2 flex-fill"
            id="preview-spinner"
-           style="background: #525659;
-                      border-radius: 4px; 
-                      text-align: center;">
+           style="display: none;
+                  background: #525659;
+                  border-radius: 4px;
+                  text-align: center;">
         <div style="height: 300px"></div>
         <div class="progress mb-4" style="width: 500px; margin: auto; background: #333">
           <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar" style="width: 0%"></div>
@@ -140,13 +148,23 @@
         <b data-i18n="loading_preview" style="color: #ccc">Erstelle Vorschau...</b>
       </div>
 
+      <div class="mb-2 flex-fill"
+           id="preview-no-input"
+           style="background: #525659;
+                  border-radius: 4px;
+                  text-align: center;">
+        <div style="height: 170px"></div>
+        <i class="bi bi-file-earmark-pdf-fill" style="color: #ccc; font-size: 196px;"></i><br>
+        <b data-i18n="add_input_to_show_preview" style="color: #ccc">Eingaben hinzufügen, um Vorschau anzuzeigen.</b>
+      </div>
+
       <iframe id="preview-iframe"
               name="preview-iframe"
               class="mb-2 flex-fill"
               style="display: none;
-                         background: #525659; 
-                         border-radius: 4px; 
-                         border: 2px solid #525659;"></iframe>
+                     background: #525659;
+                     border-radius: 4px;
+                     border: 2px solid #525659;"></iframe>
 
     </div>
   </div>

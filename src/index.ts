@@ -87,7 +87,7 @@ async function showSaveDialog(window: BrowserWindow, inputFile: string) {
 async function showAddDialog(window: BrowserWindow, inputFile: string) {
     const result = await dialog.showOpenDialog(window, {
         title: translate("add_dialog_title"),
-        defaultPath: path.dirname(inputFile),
+        defaultPath: inputFile ? path.dirname(inputFile) : undefined,
         filters: [{name: translate("add_dialog_file_type"), extensions: ["jpg", "jpeg", "pdf", "bmp", "png", "tiff"]}],
         properties: ['openFile', 'multiSelections', 'dontAddToRecent']
     });
