@@ -18,8 +18,6 @@ function getAllI18nKeys(): string[] {
     const srcDir = path.join(__dirname, '..');
     const allFiles = getAllFilesInDir(srcDir);
 
-    console.log(allFiles);
-
     const allKeys = allFiles.flatMap((file) => {
         const fileContents = fs.readFileSync(file).toString();
         const htmlKeys = (fileContents.match(/data-i18n(-title)?=["']([^"']+)["']/g) || [])
@@ -29,7 +27,7 @@ function getAllI18nKeys(): string[] {
         return [...htmlKeys, ...codeKeys];
     });
 
-    return [...new Set(allKeys)];
+    return [...new Set(allKeys)].sort();
 }
 
 function getAllFilesInDir(dir: string): string[] {

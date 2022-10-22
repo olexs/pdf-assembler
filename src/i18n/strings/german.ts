@@ -27,6 +27,7 @@ export const german = {
     "page_size": "Seitengröße:",
     "orientation_portrait": "Hochformat",
     "orientation_landscape": "Querformat",
+    "button_edit": "Eingabe bearbeiten",
     "header_edit_input": "Eingabe bearbeiten",
     "button_apply": "Übernehmen",
     "button_cancel": "Abbrechen",

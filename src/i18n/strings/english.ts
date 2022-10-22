@@ -27,6 +27,7 @@ export const english = {
     "page_size": "Page layout:",
     "orientation_portrait": "Portrait",
     "orientation_landscape": "Landscape",
+    "button_edit": "Edit input",
     "header_edit_input": "Edit input",
     "button_apply": "Apply",
     "button_cancel": "Cancel",
