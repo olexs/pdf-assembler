@@ -37,9 +37,9 @@
         }
       ],
       "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
+        {
+          "name": "@electron-forge/plugin-webpack",
+          "config": {
             "devServer": {
               "hot": false
             },
@@ -56,7 +56,7 @@
               ]
             }
           }
-        ]
+        }
       ]
     }
   },
