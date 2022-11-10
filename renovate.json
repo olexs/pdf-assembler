@@ -8,5 +8,6 @@
       "matchPackagePrefixes": ["@electron-forge"],
       "groupName": "electron-forge monorepo"
     }
-  ]
+  ],
+  "platformAutomerge": true
 }
