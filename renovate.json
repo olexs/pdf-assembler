@@ -7,6 +7,11 @@
     {
       "matchPackagePrefixes": ["@electron-forge"],
       "groupName": "electron-forge monorepo"
+    },
+    {
+      "matchDepTypes": ["devDependency"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
     }
   ],
   "platformAutomerge": true
