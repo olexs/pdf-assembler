@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "6.0.5",
-    "@electron-forge/maker-dmg": "6.0.5",
+    "@electron-forge/maker-dmg": "6.1.0",
     "@electron-forge/maker-squirrel": "6.0.5",
     "@electron-forge/plugin-webpack": "6.0.5",
     "@playwright/test": "1.32.1",
