@@ -69,7 +69,7 @@
     "@types/blob-stream": "0.1.30",
     "@types/bootstrap": "5.2.6",
     "@types/jest": "29.5.0",
-    "@types/pdfkit": "0.12.8",
+    "@types/pdfkit": "0.12.9",
     "@types/sortablejs": "1.15.1",
     "@typescript-eslint/eslint-plugin": "5.56.0",
     "@typescript-eslint/parser": "5.56.0",
