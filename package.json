@@ -86,7 +86,7 @@
     "style-loader": "3.3.3",
     "transform-loader": "0.2.4",
     "ts-jest": "29.1.0",
-    "ts-loader": "9.4.3",
+    "ts-loader": "9.4.4",
     "typescript": "5.1.5"
   },
   "dependencies": {
