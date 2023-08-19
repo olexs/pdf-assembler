@@ -61,10 +61,10 @@
     }
   },
   "devDependencies": {
-    "@electron-forge/cli": "6.3.0",
-    "@electron-forge/maker-dmg": "6.3.0",
-    "@electron-forge/maker-squirrel": "6.3.0",
-    "@electron-forge/plugin-webpack": "6.3.0",
+    "@electron-forge/cli": "6.4.0",
+    "@electron-forge/maker-dmg": "6.4.0",
+    "@electron-forge/maker-squirrel": "6.4.0",
+    "@electron-forge/plugin-webpack": "6.4.0",
     "@playwright/test": "1.37.1",
     "@types/blob-stream": "0.1.30",
     "@types/bootstrap": "5.2.6",
