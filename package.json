@@ -75,7 +75,7 @@
     "@typescript-eslint/parser": "6.7.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
     "css-loader": "6.8.1",
-    "electron": "26.2.0",
+    "electron": "26.2.1",
     "electron-playwright-helpers": "1.6.0",
     "eslint": "8.49.0",
     "eslint-plugin-import": "2.28.1",
