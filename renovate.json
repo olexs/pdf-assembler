@@ -1,17 +1,18 @@
 {
   "extends": [
     "config:base",
-    ":automergePatch"
+    ":automergeMinor"
   ],
   "packageRules": [
     {
-      "matchPackagePrefixes": ["@electron-forge"],
-      "groupName": "electron-forge monorepo"
-    },
-    {
       "matchDepTypes": ["devDependency"],
       "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "dev dependencies",
       "automerge": true
+    },
+    {
+      "matchPackagePrefixes": ["@electron-forge"],
+      "groupName": "electron-forge monorepo"
     }
   ],
   "platformAutomerge": true
