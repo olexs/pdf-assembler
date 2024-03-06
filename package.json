@@ -87,7 +87,7 @@
     "transform-loader": "0.2.4",
     "ts-jest": "29.1.2",
     "ts-loader": "9.5.1",
-    "typescript": "5.3.3"
+    "typescript": "5.4.2"
   },
   "dependencies": {
     "blob-stream": "^0.1.3",
