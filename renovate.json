@@ -17,6 +17,10 @@
     {
       "matchPackagePrefixes": ["eslint", "@typescript-eslint"],
       "groupName": "custom eslint group"
+    },
+    {
+      "matchPackageNames": ["@vercel/webpack-asset-relocator-loader"],
+      "allowedVersions": "1.7.3"
     }
   ],
   "platformAutomerge": true
