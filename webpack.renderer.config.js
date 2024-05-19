@@ -2,6 +2,7 @@ const webpack = require('webpack');
 
 const rules = require('./webpack.rules');
 const plugins = require('./webpack.plugins');
+const { experiments } = require('./webpack.main.config');
 
 rules.push(
   {
@@ -60,5 +61,8 @@ module.exports = {
   },
   externals: {
     'sharp': 'commonjs sharp'
+  },
+  experiments: {
+    topLevelAwait: true
   }
 };
