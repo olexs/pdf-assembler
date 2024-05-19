@@ -36,7 +36,7 @@ async function translateHtml(): Promise<void> {
 }
 
 function translate(key: string, options?: unknown): string {
-    return t(key, options as TOptions<object>);
+    return t(key, options as TOptions);
 }
 
 export {initialize, translateHtml, translate, resources};
