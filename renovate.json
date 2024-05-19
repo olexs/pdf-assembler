@@ -7,12 +7,16 @@
     {
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch", "minor"],
-      "groupName": "dev dependencies",
+      "groupName": "custom dev dependencies group",
       "automerge": true
     },
     {
       "matchPackagePrefixes": ["@electron-forge"],
-      "groupName": "electron-forge monorepo"
+      "groupName": "custom electron-forge group"
+    },
+    {
+      "matchPackagePrefixes": ["eslint", "@typescript-eslint"],
+      "groupName": "custom eslint group"
     }
   ],
   "platformAutomerge": true
