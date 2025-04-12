@@ -97,7 +97,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "i18next": "^24.0.0",
     "image-size": "^1.0.1",
-    "pdfkit": "^0.16.0",
+    "pdfkit": "^0.17.0",
     "sortablejs": "^1.15.0",
     "tempy": "3.0.0"
   }
