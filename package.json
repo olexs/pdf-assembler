@@ -85,7 +85,7 @@
     "playwright": "1.52.0",
     "style-loader": "4.0.0",
     "transform-loader": "0.2.4",
-    "ts-jest": "29.3.3",
+    "ts-jest": "29.3.4",
     "ts-loader": "9.5.2",
     "typescript": "5.8.3"
   },
