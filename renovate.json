@@ -1,25 +1,37 @@
 {
   "extends": [
-    "config:base",
+    "config:recommended",
     ":automergeMinor"
   ],
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch", "minor"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
       "groupName": "custom dev dependencies group",
       "automerge": true
     },
     {
-      "matchPackagePrefixes": ["@electron-forge"],
-      "groupName": "custom electron-forge group"
+      "groupName": "custom electron-forge group",
+      "matchPackageNames": [
+        "@electron-forge{/,}**"
+      ]
     },
     {
-      "matchPackagePrefixes": ["eslint", "@typescript-eslint"],
-      "groupName": "custom eslint group"
+      "groupName": "custom eslint group",
+      "matchPackageNames": [
+        "eslint{/,}**",
+        "@typescript-eslint{/,}**"
+      ]
     },
     {
-      "matchPackageNames": ["@vercel/webpack-asset-relocator-loader"],
+      "matchPackageNames": [
+        "@vercel/webpack-asset-relocator-loader"
+      ],
       "allowedVersions": "1.7.3"
     }
   ],
