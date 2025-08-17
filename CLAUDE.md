@@ -1,0 +1,77 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Development Commands
+
+- `npm start` - Launch development version with hot reload
+- `npm run package` - Package the application (required before running E2E tests)
+- `npm run make` - Create distributable packages (DMG/exe)
+- `npm test` - Run Jest unit tests
+- `npm run e2e` - Run Playwright end-to-end tests (requires app to be packaged first)
+- `npm run lint` - ESLint code quality checks
+
+## Architecture Overview
+
+### Electron Application Structure
+
+This is a dual-process Electron application with **node integration enabled** (required for file system operations):
+
+- **Main Process** (`src/index.ts`): Creates BrowserWindow, handles IPC for file dialogs, manages temporary directories, supports command-line file input
+- **Renderer Process** (`src/renderer.ts`): UI logic, file processing pipeline, PDF generation, user interactions
+
+### Core Processing Pipeline
+
+1. **Input Processing** (`src/preprocessor.ts`): Handles JPG, PNG, BMP, PDF, TIFF files. PDFs are split into individual pages using ImageMagick
+2. **Image Editing**: CropperJS integration for crop/rotate/scale transformations 
+3. **PDF Generation** (`src/pdfGenerator.ts`): Uses PDFKit to assemble final PDF with intelligent page layout and EXIF orientation handling
+
+### Key Dependencies
+
+- **ImageMagick**: External dependency (not bundled) - required for PDF splitting and image processing. Commands generated in `src/magickCommands.ts`
+- **PDFKit**: PDF generation with A4/US Letter support, margin calculations, fax optimization
+- **CropperJS**: Image editing UI with transformation data converted to ImageMagick commands
+- **SortableJS**: Drag-and-drop reordering of input files
+- **i18next**: Internationalization (English/German) with HTML attribute-based translations
+
+### Build System
+
+- **Electron Forge** with Webpack plugin
+- **Webpack configs**: Separate for main/renderer processes with special handling for PDFKit fonts and unicode data
+- **Node integration enabled**: Allows direct file system access in renderer
+- **Hot reload disabled**: For stability during development
+
+### Testing
+
+- **Jest**: Unit tests for core logic (sorting algorithms, i18n completeness)
+- **Playwright**: E2E tests with screenshot comparison and visual regression testing
+- **Testing requirement**: Run `npm run package` before E2E tests to generate app bundle
+
+### State Management
+
+- InputFile array as primary data structure containing file paths, crop/rotation state, and metadata
+- localStorage for user preferences persistence  
+- Real-time preview regeneration on file changes
+
+### IPC Communication
+
+Event channels between main and renderer:
+- `saveDialogTriggered` - Open save dialog
+- `addDialogTriggered` - Open file selection dialog  
+- `exitAfterSavingTriggered` - Close app after save
+
+### Release Process
+
+Uses semantic-release with hybrid strategy:
+- `fix:` commits → immediate patch releases
+- `feat:` commits → weekly scheduled releases (Mondays 9 AM UTC)
+- Manual releases via GitHub Actions workflow
+- Renovate handles dependency updates with conventional commit format
+
+### File Processing Notes
+
+- Natural sorting algorithm handles PDF page numbering (file.pdf-0, file.pdf-1)
+- EXIF orientation automatically handled during processing
+- Fax mode applies grayscale and threshold filters
+- Full-page images (near A4/Letter aspect ratio) omit margins automatically
+- Temporary directories created/cleaned for multi-page PDF processing
