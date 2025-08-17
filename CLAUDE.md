@@ -63,7 +63,6 @@ Event channels between main and renderer:
 ### Release Process
 
 Uses semantic-release with hybrid strategy:
-- `fix:` commits → immediate patch releases
 - `feat:` commits → weekly scheduled releases (Mondays 9 AM UTC)
 - Manual releases via GitHub Actions workflow
 - Renovate handles dependency updates with conventional commit format

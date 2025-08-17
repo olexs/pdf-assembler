@@ -37,10 +37,6 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 ### Release Triggers
 
-**Immediate Releases (for critical fixes):**
-- `fix:` commits are released immediately after merge to master
-- Ensures critical bug fixes reach users quickly
-
 **Scheduled Releases (weekly on Mondays at 9 AM UTC):**
 - `feat:` commits are batched and released weekly
 - Provides predictable feature releases for users
