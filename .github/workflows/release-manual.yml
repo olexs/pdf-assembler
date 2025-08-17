@@ -1,0 +1,47 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  manual-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Create empty commit for manual release
+        run: |
+          if [ "${{ github.event.inputs.release_type }}" = "major" ]; then
+            git commit --allow-empty -m "feat!: manual major release
+
+            BREAKING CHANGE: Manual major version release"
+          elif [ "${{ github.event.inputs.release_type }}" = "minor" ]; then
+            git commit --allow-empty -m "feat: manual minor release"
+          else
+            git commit --allow-empty -m "fix: manual patch release"
+          fi
+          git push
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

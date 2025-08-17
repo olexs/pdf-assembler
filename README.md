@@ -23,6 +23,55 @@ Create a shortcut to the generated .exe file and place it in the SendTo folder (
 - Bootstrap and Bootstrap-Icons
 - Jest
 
+## Release Process
+
+This project uses [semantic-release](https://semantic-release.gitbook.io/) for automated version management and release generation. The release strategy follows a hybrid approach:
+
+### Commit Message Format
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+- `fix:` - Bug fixes (triggers patch release)
+- `feat:` - New features (triggers minor release)
+- `feat!:` or `BREAKING CHANGE:` - Breaking changes (triggers major release)
+
+### Release Triggers
+
+**Immediate Releases (for critical fixes):**
+- `fix:` commits are released immediately after merge to master
+- Ensures critical bug fixes reach users quickly
+
+**Scheduled Releases (weekly on Mondays at 9 AM UTC):**
+- `feat:` commits are batched and released weekly
+- Provides predictable feature releases for users
+- Renovate dependency updates are included in these releases
+- Only runs if there are unreleased commits (semantic-release handles this automatically)
+
+**Manual Releases:**
+- Use GitHub Actions "Manual Release" workflow
+- Choose patch/minor/major release type
+- Useful for breaking changes that need manual approval
+
+### Renovate Integration
+
+Renovate is configured to:
+- Auto-merge patch/minor dev dependency updates
+- Group related dependencies (electron-forge, eslint)
+- Use conventional commit messages for production dependencies
+- Trigger appropriate releases when merged:
+  - Dev dependency updates → no release (automerged)
+  - Production dependency patches → patch release (weekly)
+  - Production dependency minors → minor release (weekly)
+  - Production dependency majors → requires manual review
+
+### Release Assets
+
+Each release automatically includes:
+- Windows installer (.exe)
+- macOS installer (.dmg) - when macOS builds are enabled
+- Auto-generated changelog from commit messages
+- GitHub release with proper semantic version
+
 ## Open TODOs
 
 - [ ] Icon
