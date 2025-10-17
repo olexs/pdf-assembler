@@ -58,7 +58,7 @@ module.exports = {
     alias: {
       fs: 'pdfkit/js/virtual-fs.js'
     },
-    conditionNames: ['require', 'node', 'default']
+    conditionNames: ['import', 'require', 'node', 'default']
   },
   externals: {
     'sharp': 'commonjs sharp'
