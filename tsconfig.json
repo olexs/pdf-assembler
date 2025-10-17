@@ -12,7 +12,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "*": ["node_modules/*"]
+      "*": ["node_modules/*"],
+      "image-size/fromFile": ["node_modules/image-size/dist/fromFile.d.ts"]
     }
   },
   "include": [

@@ -1,5 +1,5 @@
 import pdfkit from "pdfkit";
-import {imageSize} from "image-size";
+import {imageSizeFromFile} from "image-size/fromFile";
 import BlobStream from "blob-stream";
 import {temporaryFile} from 'tempy';
 import fs from 'fs';
@@ -105,7 +105,7 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
             processedImageFile = inputFile.file;
         }
 
-        const sizeData = imageSize(processedImageFile);
+        const sizeData = await imageSizeFromFile(processedImageFile);
 
         const isImageRotated = sizeData.orientation
             && (sizeData.orientation == exifOrientationCodes.ROTATE_90
