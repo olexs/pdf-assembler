@@ -1,11 +1,21 @@
 import {ISizeCalculationResult} from "image-size/dist/types/interface";
 import {imageSize} from "image-size";
 
+export interface CropData {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    rotate?: number;
+    scaleX?: number;
+    scaleY?: number;
+}
+
 export interface InputFile {
     file: string,
     modified: boolean,
     sizeData: ISizeCalculationResult,
-    data: Partial<Cropper.Data>,
+    data: CropData,
 }
 
 export function createNewInput(filename: string): InputFile {
