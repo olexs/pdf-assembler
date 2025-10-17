@@ -2,7 +2,7 @@
 
 ## Implementation Status
 
-**Status**: 🚧 **IN PROGRESS** - Code complete, binary download needs dylib path fixes
+**Status**: 🚧 **IN PROGRESS** - Code complete, ready for binary download testing
 
 ### Completed Work
 
@@ -14,15 +14,12 @@
 - ✅ **Phase 6**: Documentation updated (README.md, CLAUDE.md, resources/bin/README.md)
 - ✅ **Download Scripts**: Created platform-specific scripts:
   - `download-binaries-win32.sh` - Downloads from ImageMagick GitHub releases
-  - `download-binaries-darwin.sh` - Downloads from ImageMagick official archive
+  - `download-binaries-darwin.sh` - Downloads from Homebrew bottles (universal binaries)
 - ✅ **Quality**: Linting passed, all 83 unit tests passed
 
 ### Known Issues
 
-- ⚠️ **macOS dylib paths**: The official ImageMagick darwin binary has hardcoded absolute paths to dylibs that don't exist on user systems. Need to:
-  1. Extract dylibs from the tarball
-  2. Use `install_name_tool` to fix library paths to use `@loader_path` relative references
-  3. Test the fixed binary
+None currently. Homebrew bottles provide properly built universal binaries with correct dylib paths.
 
 ---
 
@@ -37,10 +34,10 @@
 - Current version: `7.1.2-7`
 
 **macOS**
-- Source: ImageMagick Official Archive
-- Format: `.tar.gz` (x86_64, runs on Intel and Apple Silicon via Rosetta)
-- URL: `https://imagemagick.org/archive/binaries/ImageMagick-x86_64-apple-darwin20.1.0.tar.gz`
-- Current version: `7.1.2-7` (version tracked, but tarball filename is static)
+- Source: Homebrew Bottles (GitHub Container Registry - ghcr.io)
+- Format: Universal binary `.tar.gz` (arm64 + x86_64)
+- Download method: `brew fetch imagemagick` (handles authentication automatically)
+- Current version: `7.1.2-7` (properly versioned, matches official releases)
 
 ### Key Decisions
 
@@ -114,51 +111,31 @@ resources/
 
 ## Next Steps
 
-### 1. Fix macOS Dylib Paths (PRIORITY)
-
-Update `download-binaries-darwin.sh` to:
-1. Extract dylibs from tarball to `lib/` subdirectory
-2. Use `install_name_tool` to update binary to use `@loader_path/lib/{dylib}`
-3. Update inter-library dependencies to use `@loader_path`
-4. Verify with `otool -L darwin/magick`
-
-### 2. Test Binary Downloads
+### 1. Test Binary Downloads
 
 ```bash
 # Download Windows binaries
 ./resources/bin/download-binaries-win32.sh
 
-# Download macOS binaries (after fixing dylib paths)
+# Download macOS binaries
 ./resources/bin/download-binaries-darwin.sh
 ```
 
-### 3. Add binaries to .gitignore
-
-The actual binary files should NOT be committed to the repository. Update `.gitignore`:
-```
-resources/bin/darwin/magick
-resources/bin/darwin/lib/
-resources/bin/darwin/config/
-resources/bin/win32/magick.exe
-resources/bin/win32/*.dll
-resources/bin/win32/config/
-```
-
-### 4. Test Development Build
+### 2. Test Development Build
 
 ```bash
 npm start
 # Test PDF splitting and image processing
 ```
 
-### 5. Test Packaging
+### 3. Test Packaging
 
 ```bash
 npm run package
 # Verify binaries are in out/.../resources/bin/
 ```
 
-### 6. Run E2E Tests
+### 4. Run E2E Tests
 
 ```bash
 npm run e2e
@@ -175,8 +152,9 @@ npm run e2e
 - ✅ Direct download from GitHub releases
 
 ### macOS
-- ⚠️ Dylib paths need fixing with `install_name_tool`
-- ✅ Binary runs on both Intel and Apple Silicon (via Rosetta)
+- ✅ Universal binaries (native arm64 + x86_64)
+- ✅ Properly versioned via Homebrew
+- ✅ Dylib paths are correct (no fixing needed)
 - ⚠️ May need to handle Gatekeeper/notarization for app signing
 - ✅ Execute permissions preserved by Electron Forge unpacking
 

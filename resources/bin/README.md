@@ -43,10 +43,10 @@ These scripts will automatically:
 - Downloads from: `https://github.com/ImageMagick/ImageMagick/releases`
 
 ### macOS
-- Source: **ImageMagick Official Archive**
-- Format: `.tar.gz` (x86_64, runs on Intel and Apple Silicon via Rosetta)
-- Downloads from: `https://imagemagick.org/archive/binaries/`
-- Note: GitHub releases don't include pre-built macOS binaries
+- Source: **Homebrew Bottles (via ghcr.io)**
+- Format: Universal binary `.tar.gz` (arm64 + x86_64)
+- Downloads via: `brew fetch imagemagick` (handles ghcr.io authentication automatically)
+- Note: Properly versioned, matches GitHub releases, supports both Apple Silicon and Intel
 
 ## Version Management
 
@@ -76,12 +76,15 @@ If you prefer to download binaries manually:
 5. Copy configuration files to `win32/config/`
 
 ### macOS
-1. Visit https://imagemagick.org/archive/binaries/
-2. Download `ImageMagick-x86_64-apple-darwin20.1.0.tar.gz`
-3. Extract: `tar -xzf ImageMagick-*.tar.gz`
-4. Copy the `magick` binary to `darwin/`
-5. Set permissions: `chmod +x darwin/magick`
-6. Copy configuration files to `darwin/config/`
+1. Ensure Homebrew is installed: `brew --version`
+2. Run: `brew fetch --force imagemagick`
+3. Find bottle in cache: `brew --cache`
+4. Extract the bottle tar.gz
+5. Copy the `magick` binary to `darwin/`
+6. Set permissions: `chmod +x darwin/magick`
+7. Copy configuration files to `darwin/config/`
+
+**Note:** The download script automates all these steps
 
 ## Testing
 
