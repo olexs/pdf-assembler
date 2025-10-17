@@ -1,3 +1,4 @@
+import { webUtils } from 'electron';
 
 export function registerDropHandlers(callbackOnDrop: (x: string[]) => void): void {
 
@@ -28,7 +29,7 @@ export function registerDropHandlers(callbackOnDrop: (x: string[]) => void): voi
         dropOverlay.style.display = 'none';
 
         const filePaths = [...event.dataTransfer.files]
-            .map(f => f.path);
+            .map(f => webUtils.getPathForFile(f));
         callbackOnDrop(filePaths);
 
         event.stopPropagation();
