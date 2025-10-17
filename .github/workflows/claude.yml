@@ -53,3 +53,4 @@ jobs:
             --allowedTools "Bash(npm ci:*)"
             --allowedTools "Bash(npm install:*)"
             --allowedTools "Bash(npm uninstall:*)"
+            --allowedTools "WebFetch"
