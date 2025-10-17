@@ -70,5 +70,11 @@ Each release automatically includes:
 
 ## Open TODOs
 
-- [ ] Icon
-- [ ] Post-install hook handler for Squirrel to add "SendTo" shortcut and close the app
+- [ ] Rework e2e tests to use PDF diffing instead of screenshots
+  - using diff-pdf or similar
+  - make sure tests run locally and on CI (install the diff tool as part of setup)
+- [ ] Add more e2e tests for core functions (file adding, reordering, cropping, rotating, saving, fax optimization)
+- [ ] Re-enable macOS builds
+- [ ] Create and add app icon
+- [ ] Bundle ImageMagick for macOS and Windows to avoid external dependency
+- [ ] Post-install hook handler on Windows for Squirrel to add "SendTo" shortcut and close the app
