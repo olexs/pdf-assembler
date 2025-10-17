@@ -12,7 +12,6 @@ import {temporaryFile} from 'tempy';
 import {initialize, translate, translateHtml} from './i18n/i18n';
 import {sortByPreprocessedFilename} from './renderer/sort';
 
-// eslint-disable-next-line import/no-named-as-default
 import Sortable from 'sortablejs';
 import {InputFile} from "./inputFile";
 import Cropper from 'cropperjs';
