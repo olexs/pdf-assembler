@@ -106,6 +106,6 @@
     "image-size": "^2.0.0",
     "pdfkit": "^0.17.0",
     "sortablejs": "^1.15.0",
-    "tempy": "3.0.0"
+    "tempy": "3.1.0"
   }
 }
