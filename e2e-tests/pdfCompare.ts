@@ -105,12 +105,13 @@ export function saveExpectedPDF(actualPath: string, expectedPath: string): void 
 }
 
 /**
- * Get the expected PDF path for a test based on test name and platform.
+ * Get the expected PDF path for a test based on test name.
+ * Platform-agnostic since PDF output should be identical across platforms.
  */
-export function getExpectedPDFPath(testName: string, platform: string = process.platform): string {
+export function getExpectedPDFPath(testName: string): string {
     // Convert test name to filename (similar to Playwright's snapshot naming)
     const sanitized = testName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
-    return path.join(__dirname, 'main.spec.ts-snapshots', `${sanitized}-${platform}.pdf`);
+    return path.join(__dirname, 'main.spec.ts-snapshots', `${sanitized}.pdf`);
 }
 
 /**
