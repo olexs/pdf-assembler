@@ -70,6 +70,6 @@ Each release automatically includes:
 
 ## Open TODOs
 
-- [ ] Create and add app icon
+- [x] Create and add app icon
 - [ ] Bundle ImageMagick for macOS and Windows to avoid external dependency
 - [ ] Post-install hook handler on Windows for Squirrel to add "SendTo" shortcut and close the app

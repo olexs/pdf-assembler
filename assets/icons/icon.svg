@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)"/>
+
+  <!-- Left document (background) -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="150" width="160" height="220" rx="8" fill="#ffffff" opacity="0.9"/>
+    <rect x="100" y="150" width="160" height="40" rx="8" fill="#c0392b"/>
+    <text x="180" y="178" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">PDF</text>
+    <!-- Document lines -->
+    <line x1="120" y1="220" x2="240" y2="220" stroke="#bdc3c7" stroke-width="4"/>
+    <line x1="120" y1="245" x2="240" y2="245" stroke="#bdc3c7" stroke-width="4"/>
+    <line x1="120" y1="270" x2="200" y2="270" stroke="#bdc3c7" stroke-width="4"/>
+  </g>
+
+  <!-- Right document (foreground) -->
+  <g filter="url(#shadow)">
+    <rect x="252" y="180" width="160" height="220" rx="8" fill="#ffffff"/>
+    <rect x="252" y="180" width="160" height="40" rx="8" fill="#c0392b"/>
+    <text x="332" y="208" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">PDF</text>
+    <!-- Document lines -->
+    <line x1="272" y1="250" x2="392" y2="250" stroke="#bdc3c7" stroke-width="4"/>
+    <line x1="272" y1="275" x2="392" y2="275" stroke="#bdc3c7" stroke-width="4"/>
+    <line x1="272" y1="300" x2="352" y2="300" stroke="#bdc3c7" stroke-width="4"/>
+  </g>
+
+  <!-- Arrow combining documents -->
+  <g>
+    <path d="M 220 260 L 265 260 L 265 240 L 295 270 L 265 300 L 265 280 L 220 280 Z" fill="#ecf0f1" filter="url(#shadow)"/>
+  </g>
+</svg>
