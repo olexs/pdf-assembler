@@ -1,6 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'cropperjs/dist/cropper.css';
 import {Modal} from 'bootstrap';
 import {ipcRenderer} from 'electron';
 import {generatePdf, GeneratorOptions} from './pdfGenerator';
@@ -215,36 +214,88 @@ async function editInput(index: number): Promise<void> {
     const img = document.getElementById('input-edit-cropper') as HTMLImageElement;
     img.src = "file://" + inputFiles[index].file;
 
-    let editedState = inputFiles[index].data;
+    const cropper = new Cropper(img);
+    const cropperImage = cropper.getCropperImage();
+    const cropperSelection = cropper.getCropperSelection();
 
-    const cropper = new Cropper(img, {
-        checkOrientation: false,
-        autoCropArea: 1,
-        minContainerWidth: 765,
-        minContainerHeight: 500,
-        data: inputFiles[index].data,
-        crop(event: Cropper.CropEvent<HTMLImageElement>) {
-            editedState = event.detail;
+    if (!cropperImage || !cropperSelection) {
+        console.error('Failed to initialize cropper components');
+        return;
+    }
+
+    // Apply initial transform data if exists
+    const initialData = inputFiles[index].data;
+    if (initialData.rotate) {
+        cropperImage.$rotate((initialData.rotate * Math.PI) / 180);
+    }
+    if (initialData.scaleX !== undefined && initialData.scaleX !== 1) {
+        cropperImage.$scale(initialData.scaleX, initialData.scaleY || 1);
+    }
+    if (initialData.x !== undefined && initialData.width && initialData.height) {
+        cropperSelection.$change(initialData.x, initialData.y || 0, initialData.width, initialData.height);
+    }
+
+    const getCropData = () => {
+        const transform = cropperImage.$getTransform();
+        // Extract rotation from transformation matrix
+        const rotation = Math.atan2(transform[1], transform[0]);
+        const rotationDegrees = (rotation * 180) / Math.PI;
+
+        // Extract scale from transformation matrix
+        const scaleX = Math.sqrt(transform[0] * transform[0] + transform[1] * transform[1]);
+        const scaleY = Math.sqrt(transform[2] * transform[2] + transform[3] * transform[3]);
+
+        return {
+            x: cropperSelection.x,
+            y: cropperSelection.y,
+            width: cropperSelection.width,
+            height: cropperSelection.height,
+            rotate: rotationDegrees,
+            scaleX: transform[0] < 0 ? -scaleX : scaleX,
+            scaleY: transform[3] < 0 ? -scaleY : scaleY,
+        };
+    };
+
+    const cleanup = () => {
+        // Remove the cropper container element
+        const container = cropper.container;
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
         }
-    });
+    };
 
-    document.getElementById('btn-input-edit-cancel').onclick = () => { cropper.destroy(); modal.hide(); }
-    document.getElementById('btn-input-edit-close').onclick = () => { cropper.destroy(); modal.hide(); }
+    document.getElementById('btn-input-edit-cancel').onclick = () => { cleanup(); modal.hide(); }
+    document.getElementById('btn-input-edit-close').onclick = () => { cleanup(); modal.hide(); }
     document.getElementById('btn-input-edit-confirm').onclick = async () => {
-        inputFiles[index].data = editedState;
+        inputFiles[index].data = getCropData();
         inputFiles[index].modified = true;
-        cropper.destroy();
+        cleanup();
         modal.hide();
         await processInputFiles(inputFiles);
     }
 
-    document.getElementById('btn-input-edit-reset').onclick = () => { cropper.reset(); }
-    document.getElementById('btn-input-edit-rotate-cw').onclick = () => { cropper.rotate(90); }
-    document.getElementById('btn-input-edit-rotate-ccw').onclick = () => { cropper.rotate(-90);  }
-    document.getElementById('btn-input-edit-flip-horizontal').onclick = () => { cropper.scaleX(-editedState.scaleX); }
-    document.getElementById('btn-input-edit-flip-vertical').onclick = () => { cropper.scaleY(-editedState.scaleY); }
-    document.getElementById('btn-input-edit-zoom-in').onclick = () => { cropper.zoom(0.1); }
-    document.getElementById('btn-input-edit-zoom-out').onclick = () => { cropper.zoom(-0.1); }
+    document.getElementById('btn-input-edit-reset').onclick = () => {
+        cropperImage.$resetTransform();
+        cropperSelection.$reset();
+    }
+    document.getElementById('btn-input-edit-rotate-cw').onclick = () => {
+        cropperImage.$rotate((90 * Math.PI) / 180);
+    }
+    document.getElementById('btn-input-edit-rotate-ccw').onclick = () => {
+        cropperImage.$rotate((-90 * Math.PI) / 180);
+    }
+    document.getElementById('btn-input-edit-flip-horizontal').onclick = () => {
+        const transform = cropperImage.$getTransform();
+        const currentScaleX = transform[0];
+        cropperImage.$scale(-currentScaleX, transform[3]);
+    }
+    document.getElementById('btn-input-edit-flip-vertical').onclick = () => {
+        const transform = cropperImage.$getTransform();
+        const currentScaleY = transform[3];
+        cropperImage.$scale(transform[0], -currentScaleY);
+    }
+    document.getElementById('btn-input-edit-zoom-in').onclick = () => { cropperImage.$zoom(0.1); }
+    document.getElementById('btn-input-edit-zoom-out').onclick = () => { cropperImage.$zoom(-0.1); }
 }
 
 async function sortInputs(): Promise<void> {
