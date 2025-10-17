@@ -100,7 +100,7 @@
     "cropperjs": "1.6.2",
     "electron-squirrel-startup": "^1.0.0",
     "i18next": "^25.0.0",
-    "image-size": "^1.0.1",
+    "image-size": "^2.0.0",
     "pdfkit": "^0.17.0",
     "sortablejs": "^1.15.0",
     "tempy": "3.0.0"
