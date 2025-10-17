@@ -49,43 +49,43 @@ jobs:
           path: out/make/squirrel.windows/x64/*.exe
           retention-days: 3
 
-#  build-macos:
-#    runs-on: macos-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-#      - name: Setup Node.JS
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version-file: '.node-version'
-#          cache: 'npm'
-#      - name: Install ImageMagick
-#        run: brew install imagemagick
-#      - name: Install dependencies
-#        run: npm ci
-#      - name: Lint
-#        run: npm run lint
-#      - name: Run unit tests
-#        run: npm test
-#      - name: Package Electron app
-#        run: npm run package
-#      - name: Run E2E tests
-#        run: npm run e2e
-#      - name: Upload E2E test results as artifacts
-#        if: always()
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: macos-e2e-test-results
-#          path: test-results/
-#          retention-days: 3
-#      - name: Make MacOS installer
-#        run: npm run make
-#      - name: Upload installer as artifact
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: macos-installer
-#          path: out/make/*.dmg
-#          retention-days: 3
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Setup Node.JS
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+      - name: Install ImageMagick and Ghostscript
+        run: brew install imagemagick ghostscript
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Run unit tests
+        run: npm test
+      - name: Package Electron app
+        run: npm run package
+      - name: Run E2E tests
+        run: npm run e2e
+      - name: Upload E2E test results as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-e2e-test-results
+          path: test-results/
+          retention-days: 3
+      - name: Make MacOS installer
+        run: npm run make
+      - name: Upload installer as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: out/make/*.dmg
+          retention-days: 3
 
   release-scheduled:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')

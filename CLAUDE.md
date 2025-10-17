@@ -41,6 +41,14 @@ This is a dual-process Electron application with **node integration enabled** (r
 - **Node integration enabled**: Allows direct file system access in renderer
 - **Hot reload disabled**: For stability during development
 
+### CI/CD
+
+- **Platforms**: Windows and macOS builds run on every push/PR to master
+- **Dependencies**: Both platforms install ImageMagick and Ghostscript via package managers (choco/brew)
+- **Build pipeline**: Lint → Unit tests → Package → E2E tests → Make installer
+- **Artifacts**: Installers (.exe/.dmg) and test results uploaded for each build
+- **Release process**: Currently being reworked (scheduled/manual releases via semantic-release)
+
 ### Testing
 
 - **Jest**: Unit tests for core logic (sorting algorithms, i18n completeness)

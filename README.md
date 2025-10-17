@@ -75,8 +75,11 @@ Each release automatically includes:
   - tests compare actual PDF output against baseline PDFs
   - supports multi-page PDF comparison
   - run `UPDATE_SNAPSHOTS=true npm run e2e` to update baselines
+- [x] Re-enable macOS builds in CI
+  - updated macOS build job with same configuration as Windows
+  - uses latest action versions (@v5, @v6)
+  - includes Ghostscript installation for PDF processing
 - [ ] Add more e2e tests for core functions (file adding, reordering, cropping, rotating, saving, fax optimization)
-- [ ] Re-enable macOS builds
 - [ ] Create and add app icon
 - [ ] Bundle ImageMagick for macOS and Windows to avoid external dependency
 - [ ] Post-install hook handler on Windows for Squirrel to add "SendTo" shortcut and close the app
