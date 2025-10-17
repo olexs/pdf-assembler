@@ -35,17 +35,27 @@ async function launchApp(...args: string[]): Promise<Page> {
         args: [appInfo.main, ...args],
         executablePath: appInfo.executable
     });
+
+    // Capture app crashes
+    electronApp.on('close', () => {
+        console.error('Electron app closed unexpectedly');
+    });
+
     electronApp.on('window', async (page) => {
         const filename = page.url()?.split('/').pop();
         console.log(`Window opened: ${filename}`);
 
         // capture errors
         page.on('pageerror', (error) => {
-            console.error(error);
+            console.error('Page error:', error);
         });
         // capture console messages
         page.on('console', (msg) => {
-            console.log(msg.text());
+            console.log(`[${msg.type()}]`, msg.text());
+        });
+        // capture crashed pages
+        page.on('crash', () => {
+            console.error('Page crashed');
         });
     });
 
@@ -61,7 +71,8 @@ test.afterEach(async () => {
  */
 async function savePDFAndCompare(page: Page, testName: string) {
     // Wait for the save button to be enabled (PDF generation complete)
-    await page.waitForSelector('#save-button:not([disabled])', { timeout: 30000 });
+    // Increased timeout for slower CI runners, especially with image processing
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
 
     const actualPath = getActualPDFPath(testName);
     const expectedPath = getExpectedPDFPath(testName);
@@ -133,15 +144,29 @@ test('generates correct PDF after rotating and cropping', async () => {
     const page = await launchApp('e2e-tests/inputs/Placeholder.png');
     await page.waitForSelector('#input-list .list-group-item');
 
+    // Wait for initial PDF generation
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('Initial PDF ready');
+
     // Edit the image
     await page.locator('#btn-input-edit-0').click();
+    console.log('Edit dialog opened');
     await page.locator('#btn-input-edit-rotate-ccw').click();
+    console.log('Rotated counter-clockwise');
     await page.locator('#btn-input-edit-zoom-in').click();
     await page.locator('#btn-input-edit-zoom-in').click();
+    console.log('Zoomed in 2x');
     await page.locator('#btn-input-edit-confirm').click();
+    console.log('Confirmed edits, waiting for PDF regeneration');
 
-    // Wait for preview to regenerate
-    await page.waitForTimeout(1000);
+    // Wait for preview to regenerate - save button will be disabled then re-enabled
+    // First wait for it to be disabled (processing started)
+    await page.waitForSelector('#save-button[disabled]', { timeout: 5000 }).catch(() => {
+        console.log('Save button did not disable (might have been too fast)');
+    });
+    // Then wait for it to be enabled again (processing complete)
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('PDF regenerated after edits');
 
     await savePDFAndCompare(page, 'generates correct PDF after rotating and cropping');
 });
