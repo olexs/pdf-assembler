@@ -55,9 +55,29 @@ This is a dual-process Electron application with **node integration enabled** (r
 - **Playwright**: E2E tests with PDF output comparison using ImageMagick
   - Tests generate actual PDFs and compare against baseline PDFs
   - Supports multi-page PDF comparison (compares each page individually)
-  - Run `UPDATE_SNAPSHOTS=true npm run e2e` to update PDF baselines
   - Baseline PDFs stored in `e2e-tests/main.spec.ts-snapshots/`
+  - **IMPORTANT**: Each test must call `ensureCleanState()` to prevent localStorage poisoning between test runs
 - **Testing requirement**: Run `npm run package` before E2E tests to generate app bundle
+
+#### E2E Test Baseline Management
+
+**CRITICAL**: Never regenerate baselines for existing tests unless features have explicitly changed.
+
+When adding new E2E tests:
+1. **Add the test** with proper `ensureCleanState()` call
+2. **Generate baseline for new test ONLY**: `UPDATE_SNAPSHOTS=true npx playwright test --grep "new test name"`
+3. **Verify existing tests still pass**: `npx playwright test --grep-invert "new test name"`
+4. **Commit only the new baseline PDF** - do not commit changes to existing baselines
+
+When modifying existing features:
+- Only regenerate baselines affected by the feature change
+- Document why baselines changed in the commit message
+- Verify unrelated tests still pass with their original baselines
+
+Common mistakes to avoid:
+- Running `UPDATE_SNAPSHOTS=true npm run e2e` regenerates ALL baselines - only do this if intentional
+- Forgetting `ensureCleanState()` causes tests to use localStorage state from previous runs
+- Committing baseline changes without verifying existing tests pass first
 
 ### Pre-Commit Checklist
 
