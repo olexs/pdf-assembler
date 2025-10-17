@@ -5,6 +5,7 @@ import {ipcRenderer} from 'electron';
 import * as child from 'child_process';
 import util from 'util';
 import {createNewInput, InputFile} from "./inputFile";
+import {getMagickBinaryPath, getMagickEnv} from './binaryPaths';
 
 const exec = util.promisify(child.exec);
 
@@ -47,7 +48,10 @@ async function deconstructPdf(inputFile: string): Promise<string[]> {
     console.log("Deconstructing", inputFilename, "to", tempDir);
     const magickTargetFilename = tempDir + path.sep + inputFilename + ".jpg";
 
-    await exec(`magick convert -density 216 "${inputFile}" "${magickTargetFilename}"`);
+    const magickPath = getMagickBinaryPath();
+    await exec(`"${magickPath}" convert -density 216 "${inputFile}" "${magickTargetFilename}"`, {
+        env: getMagickEnv()
+    });
 
     const files = await fs.promises.readdir(tempDir);
 

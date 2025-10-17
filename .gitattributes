@@ -1,0 +1,7 @@
+# Binary files for bundled dependencies
+resources/bin/**/*.exe binary
+resources/bin/**/*.dll binary
+resources/bin/**/magick binary
+resources/bin/**/gs binary
+resources/bin/**/*.dylib binary
+resources/bin/**/*.so binary

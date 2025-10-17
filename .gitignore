@@ -96,3 +96,11 @@ out/
 
 # IntelliJ IDEA
 .idea
+
+# Bundled binaries (downloaded by scripts, not committed)
+resources/bin/darwin/magick
+resources/bin/darwin/lib/
+resources/bin/darwin/config/
+resources/bin/win32/magick.exe
+resources/bin/win32/*.dll
+resources/bin/win32/config/

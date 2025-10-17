@@ -8,6 +8,7 @@ import util from 'util';
 import {InputFile} from "./inputFile";
 import {magickApplyCropperJsTransform, magickOptimizeForFax} from "./magickCommands";
 import {exifOrientationCodes} from "./exifOrientationCodes";
+import {getMagickBinaryPath, getMagickEnv} from './binaryPaths';
 
 const exec = util.promisify(child.exec);
 
@@ -87,7 +88,8 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
             console.log("temp file for", inputFile.file, ":", tempFile);
 
             try {
-                const magickCommand = `magick convert "${inputFile.file}" ` +
+                const magickPath = getMagickBinaryPath();
+                const magickCommand = `"${magickPath}" convert "${inputFile.file}" ` +
                     (inputFile.modified ? magickApplyCropperJsTransform(inputFile.data, inputFile.sizeData) : '') +
                     `-resize ${magickMaxSize} ` +
                     (optimizeForFax ? magickOptimizeForFax : '') +
@@ -95,7 +97,7 @@ async function generatePdf(inputFiles: InputFile[], options: Partial<GeneratorOp
 
                 console.log(magickCommand);
 
-                await exec(magickCommand);
+                await exec(magickCommand, { env: getMagickEnv() });
             } catch (e: unknown) {
                 console.error(e);
             }

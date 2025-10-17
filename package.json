@@ -22,7 +22,13 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./assets/icons/icon.icns"
+        "icon": "./assets/icons/icon.icns",
+        "extraResource": [
+          "resources/bin"
+        ],
+        "asar": {
+          "unpack": "resources/bin/**/*"
+        }
       },
       "makers": [
         {

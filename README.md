@@ -2,7 +2,7 @@
 
 This tool allows to merge multiple images or PDF files into a single multi-page PDF, optionally pre-processing the images for quick transfer via fax.
 
-Image manipulation is done using ImageMagick, "magick convert" needs to be available on the PATH for this tool to work.
+Image manipulation is done using bundled ImageMagick and Ghostscript binaries - no external installation required!
 
 ## How to use
 
@@ -18,7 +18,7 @@ Create a shortcut to the generated .exe file and place it in the SendTo folder (
 
 - Electron Forge
 - Typescript
-- ImageMagick
+- ImageMagick (bundled with Ghostscript delegates)
 - PDFkit
 - Bootstrap and Bootstrap-Icons
 - Jest
@@ -68,8 +68,14 @@ Each release automatically includes:
 - Auto-generated changelog from commit messages
 - GitHub release with proper semantic version
 
+## Bundled Dependencies
+
+ImageMagick binaries are bundled with the application for both Windows and macOS. This eliminates the need for users to install ImageMagick separately. ImageMagick includes built-in Ghostscript delegates for PDF processing.
+
+Binary versions are tracked using Renovate regex comments in download scripts at `resources/bin/download-binaries-*.sh`. Updates are automatically detected and PRs created. For more information about downloading and managing binaries, see `resources/bin/README.md`.
+
 ## Open TODOs
 
 - [x] Create and add app icon
-- [ ] Bundle ImageMagick for macOS and Windows to avoid external dependency
+- [x] Bundle ImageMagick for macOS and Windows to avoid external dependency
 - [ ] Post-install hook handler on Windows for Squirrel to add "SendTo" shortcut and close the app

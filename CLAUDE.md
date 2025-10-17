@@ -23,16 +23,29 @@ This is a dual-process Electron application with **node integration enabled** (r
 ### Core Processing Pipeline
 
 1. **Input Processing** (`src/preprocessor.ts`): Handles JPG, PNG, BMP, PDF, TIFF files. PDFs are split into individual pages using ImageMagick
-2. **Image Editing**: CropperJS integration for crop/rotate/scale transformations 
+2. **Image Editing**: CropperJS integration for crop/rotate/scale transformations
 3. **PDF Generation** (`src/pdfGenerator.ts`): Uses PDFKit to assemble final PDF with intelligent page layout and EXIF orientation handling
 
 ### Key Dependencies
 
-- **ImageMagick**: External dependency (not bundled) - required for PDF splitting and image processing. Commands generated in `src/magickCommands.ts`
+- **ImageMagick**: Bundled binary for PDF splitting and image processing. Binary path resolution handled in `src/binaryPaths.ts`. Commands generated in `src/magickCommands.ts`
 - **PDFKit**: PDF generation with A4/US Letter support, margin calculations, fax optimization
 - **CropperJS**: Image editing UI with transformation data converted to ImageMagick commands
 - **SortableJS**: Drag-and-drop reordering of input files
 - **i18next**: Internationalization (English/German) with HTML attribute-based translations
+
+### Bundled Binary System
+
+ImageMagick binaries are bundled with the application to eliminate external dependencies:
+
+- **Binary Location**: `resources/bin/{platform}/` (darwin/win32)
+- **Download Scripts**: Platform-specific scripts download binaries from GitHub releases (Windows) or official archive (macOS)
+- **Path Resolution**: `src/binaryPaths.ts` provides platform-specific paths for development and production
+- **Environment Setup**: `getMagickEnv()` configures MAGICK_HOME and MAGICK_CONFIGURE_PATH
+- **Version Tracking**: Renovate monitors version comments in download scripts for automatic updates
+- **Packaging**: Binaries are unpacked from asar (configured in package.json) to preserve execute permissions
+- **Documentation**: See `resources/bin/README.md` for binary download and update instructions
+- **PDF Support**: ImageMagick includes built-in Ghostscript delegates for PDF processing
 
 ### Build System
 
@@ -44,10 +57,11 @@ This is a dual-process Electron application with **node integration enabled** (r
 ### CI/CD
 
 - **Platforms**: Windows and macOS builds run on every push/PR to master
-- **Dependencies**: Both platforms install ImageMagick and Ghostscript via package managers (choco/brew)
+- **Dependencies**: Uses bundled ImageMagick binaries (no installation required)
 - **Build pipeline**: Lint → Unit tests → Package → E2E tests → Make installer
 - **Artifacts**: Installers (.exe/.dmg) and test results uploaded for each build
 - **Release process**: Currently being reworked (scheduled/manual releases via semantic-release)
+- **Binary Updates**: Renovate monitors version comments in `resources/bin/download-binaries-*.sh` scripts for new ImageMagick releases
 
 ### Testing
 
