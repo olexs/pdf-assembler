@@ -315,6 +315,13 @@ ipcRenderer.on("addDialogConfirmed", async (_event, data) => await addNewInputs(
 
 let previousBlobUrl = "";
 
+// Expose for e2e testing
+declare global {
+    interface Window {
+        previousBlobUrl: string;
+    }
+}
+
 async function generateTempPDF() {
     document.getElementById("preview-iframe").style.display = "none";
     document.getElementById("preview-no-input").style.display = "none";
@@ -330,6 +337,7 @@ async function generateTempPDF() {
 
     localStorage.setItem("generator-preferences", JSON.stringify(options));
     previousBlobUrl = pdfDataUrl;
+    window.previousBlobUrl = pdfDataUrl; // Expose for e2e testing
 
     (<HTMLButtonElement>document.getElementById("save-button")).disabled = false;
     (<HTMLButtonElement>document.getElementById("print-button")).disabled = false;

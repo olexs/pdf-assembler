@@ -44,8 +44,23 @@ This is a dual-process Electron application with **node integration enabled** (r
 ### Testing
 
 - **Jest**: Unit tests for core logic (sorting algorithms, i18n completeness)
-- **Playwright**: E2E tests with screenshot comparison and visual regression testing
+- **Playwright**: E2E tests with PDF output comparison using ImageMagick
+  - Tests generate actual PDFs and compare against baseline PDFs
+  - Supports multi-page PDF comparison (compares each page individually)
+  - Run `UPDATE_SNAPSHOTS=true npm run e2e` to update PDF baselines
+  - Baseline PDFs stored in `e2e-tests/main.spec.ts-snapshots/`
 - **Testing requirement**: Run `npm run package` before E2E tests to generate app bundle
+
+### Pre-Commit Checklist
+
+Before committing changes, ALWAYS run the following commands in order to ensure code quality:
+
+1. **Lint**: `npm run lint` - Fix all ESLint errors
+2. **Unit Tests**: `npm test` - Ensure all Jest tests pass
+3. **Package**: `npm run package` - Build the application
+4. **E2E Tests**: `npm run e2e` - Verify all Playwright tests pass
+
+If any of these fail, fix the issues before committing. This ensures the codebase remains stable and all changes are properly tested.
 
 ### State Management
 

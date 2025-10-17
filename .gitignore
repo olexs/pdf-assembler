@@ -1,6 +1,9 @@
 input
 test-results
 
+# E2E test outputs (but keep expected snapshots)
+e2e-tests/outputs/
+
 # Logs
 logs
 *.log

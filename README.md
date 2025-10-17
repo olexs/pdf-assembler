@@ -70,9 +70,11 @@ Each release automatically includes:
 
 ## Open TODOs
 
-- [ ] Rework e2e tests to use PDF diffing instead of screenshots
-  - using diff-pdf or similar
-  - make sure tests run locally and on CI (install the diff tool as part of setup)
+- [x] Rework e2e tests to use PDF diffing instead of screenshots
+  - using ImageMagick compare (already a project dependency)
+  - tests compare actual PDF output against baseline PDFs
+  - supports multi-page PDF comparison
+  - run `UPDATE_SNAPSHOTS=true npm run e2e` to update baselines
 - [ ] Add more e2e tests for core functions (file adding, reordering, cropping, rotating, saving, fax optimization)
 - [ ] Re-enable macOS builds
 - [ ] Create and add app icon
