@@ -1,5 +1,5 @@
 import {ISizeCalculationResult} from "image-size/dist/types/interface";
-import {imageSize} from "image-size";
+import {imageSizeFromFile} from "image-size/fromFile";
 
 export interface InputFile {
     file: string,
@@ -8,8 +8,8 @@ export interface InputFile {
     data: Partial<Cropper.Data>,
 }
 
-export function createNewInput(filename: string): InputFile {
-    const sizeData = imageSize(filename);
+export async function createNewInput(filename: string): Promise<InputFile> {
+    const sizeData = await imageSizeFromFile(filename);
 
     return {
         file: filename,

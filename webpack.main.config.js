@@ -9,7 +9,8 @@ module.exports = {
     rules: require('./webpack.rules'),
   },
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json']
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
+    conditionNames: ['require', 'node', 'default']
   },
   experiments: {
     topLevelAwait: true

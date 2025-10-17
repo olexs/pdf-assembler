@@ -10,7 +10,7 @@ const exec = util.promisify(child.exec);
 
 async function preprocessInputFiles(inputFiles: string[]): Promise<InputFile[]> {
     const processedFiles = await Promise.all(inputFiles.map(processFile));
-    return processedFiles.flat().map(createNewInput);
+    return Promise.all(processedFiles.flat().map(createNewInput));
 }
 
 const supportedExtensions = [
