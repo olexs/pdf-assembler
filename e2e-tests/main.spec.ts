@@ -67,6 +67,27 @@ test.afterEach(async () => {
 });
 
 /**
+ * Helper function to ensure clean state for tests
+ * Sets portrait orientation and disables fax optimization by default
+ */
+async function ensureCleanState(page: Page, options: { faxOptimization?: boolean } = {}) {
+    await page.evaluate((opts) => {
+        const portraitRadio = document.getElementById('radio-orientation-portrait') as HTMLInputElement;
+        const faxCheckbox = document.getElementById('optimize-for-fax') as HTMLInputElement;
+
+        if (!portraitRadio.checked) {
+            portraitRadio.click();
+        }
+
+        if (opts.faxOptimization && !faxCheckbox.checked) {
+            faxCheckbox.click();
+        } else if (!opts.faxOptimization && faxCheckbox.checked) {
+            faxCheckbox.click();
+        }
+    }, options);
+}
+
+/**
  * Helper function to save PDF and compare with baseline
  */
 async function savePDFAndCompare(page: Page, testName: string) {
@@ -124,6 +145,8 @@ test('generates correct PDF for single input', async () => {
     const page = await launchApp('e2e-tests/inputs/Placeholder.png');
 
     await page.waitForSelector('#input-list .list-group-item');
+    await ensureCleanState(page);
+
     await savePDFAndCompare(page, 'generates correct PDF for single input');
 });
 
@@ -137,12 +160,16 @@ test('generates correct PDF for multiple inputs', async () => {
         return items.length === 2;
     });
 
+    await ensureCleanState(page);
+
     await savePDFAndCompare(page, 'generates correct PDF for multiple inputs');
 });
 
 test('generates correct PDF after rotating and cropping', async () => {
     const page = await launchApp('e2e-tests/inputs/Placeholder.png');
     await page.waitForSelector('#input-list .list-group-item');
+
+    await ensureCleanState(page);
 
     // Wait for initial PDF generation
     await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
@@ -169,4 +196,19 @@ test('generates correct PDF after rotating and cropping', async () => {
     console.log('PDF regenerated after edits');
 
     await savePDFAndCompare(page, 'generates correct PDF after rotating and cropping');
+});
+
+test('generates correct PDF with fax optimization', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png');
+
+    await page.waitForSelector('#input-list .list-group-item');
+
+    await ensureCleanState(page, { faxOptimization: true });
+    console.log('Set portrait orientation and enabled fax optimization');
+
+    // Wait for PDF to be generated with fax optimization
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('PDF generated with fax optimization');
+
+    await savePDFAndCompare(page, 'generates correct PDF with fax optimization');
 });
