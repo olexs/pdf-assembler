@@ -29,27 +29,56 @@ jobs:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
-      - name: Run Claude Code to analyze failure
-        uses: anthropics/claude-code-action@v1
+      - name: Get PR number
+        id: pr
+        uses: actions/github-script@v7
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            The Renovate PR build failed for branch ${{ github.event.workflow_run.head_branch }}.
-            Please analyze the CI failure and propose a fix if possible.
+          script: |
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${context.payload.workflow_run.head_branch}`,
+              state: 'open'
+            });
 
-            Workflow run: ${{ github.event.workflow_run.html_url }}
+            if (prs.data.length === 0) {
+              core.setFailed('No open PR found for this branch');
+              return;
+            }
 
-          additional_permissions: |
-            actions: read
+            const prNumber = prs.data[0].number;
+            core.setOutput('number', prNumber);
+            return prNumber;
 
-          # Allow Claude to run build, package, lint, and test commands (excludes e2e tests)
-          claude_args: >-
-            --allowedTools "Bash(npm run lint:*)"
-            --allowedTools "Bash(npm run test:*)"
-            --allowedTools "Bash(npm run package:*)"
-            --allowedTools "Bash(npm run make:*)"
-            --allowedTools "Bash(npm test:*)"
-            --allowedTools "Bash(npm ci:*)"
-            --allowedTools "Bash(npm install:*)"
-            --allowedTools "Bash(npm uninstall:*)"
-            --allowedTools "WebFetch"
+      - name: Comment on PR to trigger Claude
+        if: steps.pr.outputs.number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CLAUDE_TRIGGER_PAT }}
+          script: |
+            const prNumber = ${{ steps.pr.outputs.number }};
+
+            // Check if Claude has already been invoked for this workflow run
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const claudeAlreadyInvoked = comments.data.some(comment =>
+              comment.body.includes('Renovate PR build failed') &&
+              comment.body.includes(context.payload.workflow_run.id.toString())
+            );
+
+            if (claudeAlreadyInvoked) {
+              console.log('Claude has already been invoked for this workflow run, skipping.');
+              return;
+            }
+
+            // Post comment to trigger Claude
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `@claude The Renovate PR build failed (workflow run: ${context.payload.workflow_run.id}).\n\nPlease analyze the CI failure and implement a fix if possible.\n\nWorkflow run: ${context.payload.workflow_run.html_url}`
+            });
