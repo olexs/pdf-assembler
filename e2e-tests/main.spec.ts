@@ -63,29 +63,13 @@ async function launchApp(...args: string[]): Promise<Page> {
 }
 
 test.afterEach(async () => {
+    // Clear localStorage to prevent state poisoning between tests
+    const page = await electronApp.firstWindow();
+    await page.evaluate(() => {
+        localStorage.clear();
+    });
     await electronApp.close();
 });
-
-/**
- * Helper function to ensure clean state for tests
- * Sets portrait orientation and disables fax optimization by default
- */
-async function ensureCleanState(page: Page, options: { faxOptimization?: boolean } = {}) {
-    await page.evaluate((opts) => {
-        const portraitRadio = document.getElementById('radio-orientation-portrait') as HTMLInputElement;
-        const faxCheckbox = document.getElementById('optimize-for-fax') as HTMLInputElement;
-
-        if (!portraitRadio.checked) {
-            portraitRadio.click();
-        }
-
-        if (opts.faxOptimization && !faxCheckbox.checked) {
-            faxCheckbox.click();
-        } else if (!opts.faxOptimization && faxCheckbox.checked) {
-            faxCheckbox.click();
-        }
-    }, options);
-}
 
 /**
  * Helper function to save PDF and compare with baseline
@@ -145,7 +129,6 @@ test('generates correct PDF for single input', async () => {
     const page = await launchApp('e2e-tests/inputs/Placeholder.png');
 
     await page.waitForSelector('#input-list .list-group-item');
-    await ensureCleanState(page);
 
     await savePDFAndCompare(page, 'generates correct PDF for single input');
 });
@@ -160,16 +143,12 @@ test('generates correct PDF for multiple inputs', async () => {
         return items.length === 2;
     });
 
-    await ensureCleanState(page);
-
     await savePDFAndCompare(page, 'generates correct PDF for multiple inputs');
 });
 
 test('generates correct PDF after rotating and cropping', async () => {
     const page = await launchApp('e2e-tests/inputs/Placeholder.png');
     await page.waitForSelector('#input-list .list-group-item');
-
-    await ensureCleanState(page);
 
     // Wait for initial PDF generation
     await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
@@ -203,12 +182,129 @@ test('generates correct PDF with fax optimization', async () => {
 
     await page.waitForSelector('#input-list .list-group-item');
 
-    await ensureCleanState(page, { faxOptimization: true });
-    console.log('Set portrait orientation and enabled fax optimization');
+    // Enable fax optimization
+    await page.locator('#optimize-for-fax').click();
+    console.log('Enabled fax optimization');
 
     // Wait for PDF to be generated with fax optimization
     await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
     console.log('PDF generated with fax optimization');
 
     await savePDFAndCompare(page, 'generates correct PDF with fax optimization');
+});
+
+test('generates correct PDF after removing a file', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png', 'e2e-tests/inputs/ElectronLogo.png');
+
+    // Wait for all input items to be rendered
+    await page.waitForSelector('#input-list .list-group-item');
+    await page.waitForFunction(() => {
+        const items = document.querySelectorAll('#input-list .list-group-item');
+        return items.length === 2;
+    });
+    console.log('Both inputs loaded');
+
+    // Wait for initial PDF generation
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+
+    // Set up dialog handler to automatically accept the confirmation
+    page.on('dialog', dialog => {
+        console.log('Accepting confirmation dialog:', dialog.message());
+        dialog.accept();
+    });
+
+    // Remove the first input (Placeholder.png)
+    await page.locator('#btn-input-delete-0').click();
+    console.log('Clicked delete button for first file');
+
+    // Wait for single input to remain
+    await page.waitForFunction(() => {
+        const items = document.querySelectorAll('#input-list .list-group-item');
+        return items.length === 1;
+    });
+    console.log('File removed, one item remains (ElectronLogo.png)');
+
+    // Wait for PDF to regenerate with single input
+    await page.waitForSelector('#save-button[disabled]', { timeout: 5000 }).catch(() => {
+        console.log('Save button did not disable (might have been too fast)');
+    });
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('PDF regenerated with remaining file');
+
+    await savePDFAndCompare(page, 'generates correct PDF after removing a file');
+});
+
+test('generates correct PDF after reordering files', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png', 'e2e-tests/inputs/ElectronLogo.png');
+
+    // Wait for all input items to be rendered
+    await page.waitForSelector('#input-list .list-group-item');
+    await page.waitForFunction(() => {
+        const items = document.querySelectorAll('#input-list .list-group-item');
+        return items.length === 2;
+    });
+
+    // Files are sorted alphabetically on load: ElectronLogo (0), Placeholder (1)
+    console.log('Both inputs loaded and alphabetically sorted');
+
+    // Save PDF with initial alphabetically sorted order (ElectronLogo, Placeholder)
+    await savePDFAndCompare(page, 'generates correct PDF after reordering files - before');
+
+    // Drag the second item (Placeholder) to the first position using the drag handle
+    const firstHandle = page.locator('#input-list .list-group-item .sortable-handle').nth(0);
+    const secondHandle = page.locator('#input-list .list-group-item .sortable-handle').nth(1);
+
+    // Get bounding boxes for drag operation
+    const firstBox = await firstHandle.boundingBox();
+    const secondBox = await secondHandle.boundingBox();
+
+    if (!firstBox || !secondBox) {
+        throw new Error('Could not get bounding boxes for drag handles');
+    }
+
+    // Perform drag: drag second item's handle (Placeholder) to first position
+    await page.mouse.move(secondBox.x + secondBox.width / 2, secondBox.y + secondBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(firstBox.x + firstBox.width / 2, firstBox.y + firstBox.height / 2, { steps: 10 });
+    await page.mouse.up();
+    console.log('Dragged Placeholder to first position using sortable handle');
+
+    // Wait a bit for the drag to complete and UI to update
+    await page.waitForTimeout(500);
+
+    // Wait for PDF to regenerate with reordered inputs
+    await page.waitForSelector('#save-button[disabled]', { timeout: 5000 }).catch(() => {
+        console.log('Save button did not disable (might have been too fast)');
+    });
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('PDF regenerated with reordered files (Placeholder, ElectronLogo)');
+
+    // Save PDF with reordered files (Placeholder, ElectronLogo)
+    await savePDFAndCompare(page, 'generates correct PDF after reordering files - after');
+});
+
+test('generates correct PDF in landscape orientation', async () => {
+    const page = await launchApp('e2e-tests/inputs/Placeholder.png');
+
+    await page.waitForSelector('#input-list .list-group-item');
+
+    // Set landscape orientation (different from default portrait)
+    await page.evaluate(() => {
+        const landscapeRadio = document.getElementById('radio-orientation-landscape') as HTMLInputElement;
+        const faxCheckbox = document.getElementById('optimize-for-fax') as HTMLInputElement;
+
+        if (!landscapeRadio.checked) {
+            landscapeRadio.click();
+        }
+        if (faxCheckbox.checked) {
+            faxCheckbox.click();
+        }
+    });
+    console.log('Set landscape orientation');
+
+    // Wait for PDF to be generated in landscape
+    await page.waitForSelector('#save-button:not([disabled])', { timeout: 60000 });
+    console.log('PDF generated in landscape orientation');
+
+    await savePDFAndCompare(page, 'generates correct PDF in landscape orientation');
 });
