@@ -9,7 +9,7 @@ module.exports = [
   {
     test: /\.(m?js|node)$/,
     parser: { amd: false },
-    exclude: /node_modules\/(tempy|temp-dir|is-stream|unique-string)/,
+    exclude: /node_modules[\\/](tempy|temp-dir|is-stream|unique-string|crypto-random-string)($|[\\/])/,
     use: {
       loader: '@vercel/webpack-asset-relocator-loader',
       options: {
