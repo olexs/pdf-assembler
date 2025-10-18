@@ -25,7 +25,9 @@
       "groupName": "custom eslint group",
       "matchPackageNames": [
         "eslint{/,}**",
-        "@typescript-eslint{/,}**"
+        "@eslint{/,}**",
+        "@typescript-eslint{/,}**",
+        "typescript-eslint"
       ]
     },
     {
