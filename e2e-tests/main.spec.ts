@@ -15,6 +15,9 @@ let appInfo: ElectronAppInfo;
 // Environment variable to update baselines: UPDATE_SNAPSHOTS=true npm run e2e
 const UPDATE_SNAPSHOTS = process.env.UPDATE_SNAPSHOTS === 'true';
 
+// Track whether app close is expected (from afterEach) or an unexpected crash
+let expectedClose = false;
+
 test.beforeAll(async () => {
     // find the latest build in the out directory
     const latestBuild = findLatestBuild();
@@ -31,14 +34,21 @@ test.beforeAll(async () => {
 });
 
 async function launchApp(...args: string[]): Promise<Page> {
+    // Reset expected close flag for new app instance
+    expectedClose = false;
+
     electronApp = await electron.launch({
         args: [appInfo.main, ...args],
         executablePath: appInfo.executable
     });
 
-    // Capture app crashes
+    // Capture app crashes and distinguish from expected closes
     electronApp.on('close', () => {
-        console.error('Electron app closed unexpectedly');
+        if (expectedClose) {
+            console.log('Electron app closed (expected after test completion)');
+        } else {
+            console.error('Electron app closed unexpectedly (CRASH during test execution)');
+        }
     });
 
     electronApp.on('window', async (page) => {
@@ -68,7 +78,13 @@ test.afterEach(async () => {
     await page.evaluate(() => {
         localStorage.clear();
     });
+
+    // Mark close as expected before closing
+    expectedClose = true;
     await electronApp.close();
+
+    // Add delay between tests to ensure cleanup completes on Windows
+    await new Promise(resolve => setTimeout(resolve, 1000));
 });
 
 /**
