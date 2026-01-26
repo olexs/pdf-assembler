@@ -5,6 +5,10 @@ on:
     workflows: ["Main CI"]
     types: [completed]
 
+concurrency:
+  group: claude-renovate-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
 jobs:
   check-renovate-failure:
     # Only run if the workflow failed and the PR is from Renovate
