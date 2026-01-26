@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  issue_comment:
+    types: [created]
 #  schedule:
 #   - cron: '0 9 * * 1'  # Weekly on Mondays at 9 AM UTC
 #  workflow_dispatch:
@@ -12,10 +14,19 @@ on:
 jobs:
 
   build-windows:
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/rerun-ci') &&
+       (github.event.comment.user.login == 'olexs' || github.event.comment.user.login == 'claude[bot]'))
     runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
       - name: Setup Node.JS
         uses: actions/setup-node@v6
         with:
@@ -50,10 +61,19 @@ jobs:
           retention-days: 3
 
   build-macos:
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/rerun-ci') &&
+       (github.event.comment.user.login == 'olexs' || github.event.comment.user.login == 'claude[bot]'))
     runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
       - name: Setup Node.JS
         uses: actions/setup-node@v6
         with:

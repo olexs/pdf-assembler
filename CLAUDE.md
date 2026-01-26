@@ -48,6 +48,7 @@ This is a dual-process Electron application with **node integration enabled** (r
 - **Build pipeline**: Lint → Unit tests → Package → E2E tests → Make installer
 - **Artifacts**: Installers (.exe/.dmg) and test results uploaded for each build
 - **Release process**: Currently being reworked (scheduled/manual releases via semantic-release)
+- **Re-triggering CI**: Comment `/rerun-ci` on a PR to manually trigger the CI workflow. This is useful after pushing fixes that don't automatically trigger CI (e.g., commits made via GitHub Actions). Only authorized users (olexs, claude[bot]) can trigger this.
 
 ### Testing
 
