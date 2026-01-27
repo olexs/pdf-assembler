@@ -10,7 +10,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
-    conditionNames: ['require', 'node', 'default']
+    conditionNames: ['import', 'require', 'node', 'default']
   },
   experiments: {
     topLevelAwait: true
