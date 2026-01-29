@@ -1,4 +1,4 @@
-import {app, BrowserWindow, session, dialog} from 'electron';
+import {app, BrowserWindow, session, dialog, ipcMain} from 'electron';
 import path from 'path';
 import fs from 'fs';
 import {initialize, translate} from './i18n/i18n';
@@ -22,10 +22,12 @@ const appSize = {
     height: 800,
 }
 
+let mainWindow: BrowserWindow | null = null;
+
 const createWindow = async (): Promise<void> => {
     await initialize(app.getLocale());
 
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         height: appSize.height,
         width: appSize.width,
         webPreferences: {
@@ -44,20 +46,19 @@ const createWindow = async (): Promise<void> => {
     mainWindow.setMinimumSize(appSize.width, appSize.height);
     
     mainWindow.webContents.on("did-finish-load", () => {
-        mainWindow.webContents.send("initI18n", app.getLocale());
+        if (mainWindow) {
+            mainWindow.webContents.send("initI18n", app.getLocale());
 
-        let inputFilesRelative = process.argv.slice(1);
-        if (inputFilesRelative[0] === ".") inputFilesRelative = inputFilesRelative.slice(1);
-        const inputFiles = inputFilesRelative.map(f => path.resolve(f));
-        mainWindow.webContents.send("inputFiles", inputFiles);
+            let inputFilesRelative = process.argv.slice(1);
+            if (inputFilesRelative[0] === ".") inputFilesRelative = inputFilesRelative.slice(1);
+            const inputFiles = inputFilesRelative.map(f => path.resolve(f));
+            mainWindow.webContents.send("inputFiles", inputFiles);
+        }
     });
 
-    mainWindow.webContents.on("ipc-message", (_event, channel, inputFile: string) => {
-        if (channel === "saveDialogTriggered") showSaveDialog(mainWindow, inputFile);
-        if (channel === "addDialogTriggered") showAddDialog(mainWindow, inputFile);
-        if (channel === "exitAfterSavingTriggered") app.quit();
-        if (channel === "addedTempDir") tempDirs.push(inputFile);
-    })
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
 
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
         // patch CSP to allow blob: everywhere where data: is allowed, to allow the iframe with blobSrc PDF to render -.-
@@ -71,6 +72,27 @@ const createWindow = async (): Promise<void> => {
 
     await mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 };
+
+// Set up IPC handlers (registered once at app level, not per window)
+ipcMain.on("saveDialogTriggered", (_event, inputFile: string) => {
+    if (mainWindow) {
+        showSaveDialog(mainWindow, inputFile);
+    }
+});
+
+ipcMain.on("addDialogTriggered", (_event, inputFile: string) => {
+    if (mainWindow) {
+        showAddDialog(mainWindow, inputFile);
+    }
+});
+
+ipcMain.on("exitAfterSavingTriggered", () => {
+    app.quit();
+});
+
+ipcMain.on("addedTempDir", (_event, inputFile: string) => {
+    tempDirs.push(inputFile);
+});
 
 async function showSaveDialog(window: BrowserWindow, inputFile: string) {
     const newFilename = inputFile + translate("save_dialog_default_suffix") + ".pdf";
