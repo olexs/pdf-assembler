@@ -56,7 +56,10 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
     alias: {
-      fs: 'pdfkit/js/virtual-fs.js'
+      fs: 'pdfkit/js/virtual-fs.js',
+      // Exclude node:fs from aliasing to allow tempy to use real fs module
+      'node:fs': false,
+      'node:fs/promises': false
     },
     conditionNames: ['import', 'require', 'node', 'default']
   },
