@@ -11,6 +11,7 @@ import {comparePDFs, getActualPDFPath, getExpectedPDFPath, saveExpectedPDF} from
 
 let electronApp: ElectronApplication;
 let appInfo: ElectronAppInfo;
+let currentPage: Page;
 
 // Environment variable to update baselines: UPDATE_SNAPSHOTS=true npm run e2e
 const UPDATE_SNAPSHOTS = process.env.UPDATE_SNAPSHOTS === 'true';
@@ -69,13 +70,14 @@ async function launchApp(...args: string[]): Promise<Page> {
         });
     });
 
-    return electronApp.firstWindow();
+    currentPage = await electronApp.firstWindow();
+    return currentPage;
 }
 
 test.afterEach(async () => {
     // Clear localStorage to prevent state poisoning between tests
-    const page = await electronApp.firstWindow();
-    await page.evaluate(() => {
+    // Use the stored page reference instead of calling firstWindow() again
+    await currentPage.evaluate(() => {
         localStorage.clear();
     });
 
