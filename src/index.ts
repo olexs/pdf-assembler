@@ -46,8 +46,18 @@ const createWindow = async (): Promise<void> => {
     mainWindow.webContents.on("did-finish-load", () => {
         mainWindow.webContents.send("initI18n", app.getLocale());
 
-        let inputFilesRelative = process.argv.slice(1);
-        if (inputFilesRelative[0] === ".") inputFilesRelative = inputFilesRelative.slice(1);
+        // Filter command-line arguments to get only actual file paths
+        // Exclude the main script path and "." directory marker
+        const inputFilesRelative = process.argv.slice(1).filter(arg => {
+            // Skip "." directory marker
+            if (arg === ".") return false;
+            // Skip non-existent paths (like the main script from Playwright)
+            try {
+                return fs.existsSync(arg);
+            } catch {
+                return false;
+            }
+        });
         const inputFiles = inputFilesRelative.map(f => path.resolve(f));
         mainWindow.webContents.send("inputFiles", inputFiles);
     });
