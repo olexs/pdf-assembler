@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import * as child from 'child_process';
 import util from 'util';
-import {temporaryFile} from 'tempy';
+import {temporaryFile} from './tempUtils';
 import {initialize, translate, translateHtml} from './i18n/i18n';
 import {sortByPreprocessedFilename} from './renderer/sort';
 
