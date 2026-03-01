@@ -1,4 +1,4 @@
-import {temporaryDirectory} from 'tempy';
+import {temporaryDirectory} from './tempUtils';
 import fs from 'fs';
 import path from 'path';
 import {ipcRenderer} from 'electron';
