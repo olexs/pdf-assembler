@@ -43,7 +43,6 @@ ipcRenderer.on("initI18n", async (_event, data) => {
 window.addEventListener("DOMContentLoaded", async () => {
     loadSavedOptions();
     registerStaticCallbacks();
-    initSortableJs();
     registerDropHandlers(addNewInputs);
 });
 
@@ -93,9 +92,14 @@ function registerStaticCallbacks(): void {
     (document.getElementById("select-pagesize") as HTMLSelectElement).onchange = generateTempPDF;
 }
 
+let sortableInstance: Sortable | null = null;
+
 function initSortableJs() {
+    if (sortableInstance) {
+        return; // Already initialized
+    }
     const sortContainer = document.getElementById("input-list");
-    Sortable.create(sortContainer, {
+    sortableInstance = Sortable.create(sortContainer, {
         handle: ".sortable-handle",
         onUpdate: (event) => {
             const draggedElement = inputFiles[event.oldDraggableIndex];
@@ -136,6 +140,9 @@ async function processInputFiles(newInputFiles: InputFile[]) {
         console.log(`Renderer: Processing ${newInputFiles.length} input files`);
         const previews = await Promise.all(newInputFiles.map(async (file, index) => await generateInputThumbnail(file, index, newInputFiles.length)));
         document.getElementById("input-list").innerHTML = previews.join("");
+
+        // Initialize Sortable after first render
+        initSortableJs();
     }
 
     inputFiles = newInputFiles;
