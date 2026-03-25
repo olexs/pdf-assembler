@@ -5,7 +5,7 @@ import {ipcRenderer} from 'electron';
 import {generatePdf, GeneratorOptions} from './pdfGenerator';
 import {preprocessInputFiles} from './preprocessor';
 import path from 'path';
-import fs from 'fs';
+import fs from 'node:fs';
 import * as child from 'child_process';
 import util from 'util';
 import {temporaryFile} from 'tempy';

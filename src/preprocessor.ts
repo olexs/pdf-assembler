@@ -1,5 +1,5 @@
 import {temporaryDirectory} from 'tempy';
-import fs from 'fs';
+import fs from 'node:fs';
 import path from 'path';
 import {ipcRenderer} from 'electron';
 import * as child from 'child_process';

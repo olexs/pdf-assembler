@@ -2,7 +2,7 @@ import pdfkit from "pdfkit";
 import {imageSizeFromFile} from "image-size/fromFile";
 import BlobStream from "blob-stream";
 import {temporaryFile} from 'tempy';
-import fs from 'fs';
+import fs from 'node:fs';
 import * as child from 'child_process';
 import util from 'util';
 import {InputFile} from "./inputFile";
