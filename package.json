@@ -66,10 +66,10 @@
     }
   },
   "devDependencies": {
-    "@electron-forge/cli": "7.11.1",
-    "@electron-forge/maker-dmg": "7.11.1",
-    "@electron-forge/maker-squirrel": "7.11.1",
-    "@electron-forge/plugin-webpack": "7.11.1",
+    "@electron-forge/cli": "7.11.2",
+    "@electron-forge/maker-dmg": "7.11.2",
+    "@electron-forge/maker-squirrel": "7.11.2",
+    "@electron-forge/plugin-webpack": "7.11.2",
     "@eslint/js": "^9.37.0",
     "@playwright/test": "1.58.0",
     "@semantic-release/changelog": "^6.0.3",
